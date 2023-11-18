@@ -13,8 +13,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Load API key from .env file
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
-number_of_simulations = 100
-concurrent_simulations = 10  # Number of simulations to run concurrently
 number_of_simulations = 1000
 concurrent_simulations = 15
 
