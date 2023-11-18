@@ -24,11 +24,13 @@ for i in tqdm(range(100), desc="Simulating conversations"):
     # Generate the conversation using OpenAI's chat completion API
     response = openai.Completion.create(
         model="gpt-4-1106-preview",
+        response_format={ "type": "json_object" },
         prompt=prompt,
-        max_tokens=100,
+        max_tokens=1024,
         n=1,
         stop=None,
         temperature=0.7
+        timeout=30
     )
 
     # Extract the generated message from the API response
