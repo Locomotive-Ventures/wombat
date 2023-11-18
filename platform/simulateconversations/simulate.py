@@ -13,12 +13,17 @@ load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 number_of_simulations = 100
 
-# Define the path to the prompt file
-prompt_file = "../../docs/prompts/prompt-simulation-lextranscripts.md"
+# Specify the folder to save the JSON files
+output_folder = "../../data/simulations"
+os.makedirs(output_folder, exist_ok=True)
 
-# Read the prompt from the file
-with open(prompt_file, 'r') as file:
-    prompt = file.read()
+# Define the path to the prompt file
+system_prompt_file = "../../docs/prompts/prompt-simulation-lextranscripts-system.md"
+with open(system_prompt_file, 'r') as file:
+    system_prompt = file.read()
+user_prompt_file = "../../docs/prompts/prompt-simulation-lextranscripts-user.md"
+with open(user_prompt_file, 'r') as file:
+    user_prompt = file.read()
 
 # Init the OpenAI client
 try:
@@ -31,16 +36,15 @@ except Exception as e:
 for i in tqdm(range(number_of_simulations), desc="Simulating conversations"):
     # Generate the conversation using OpenAI's chat completion API
     response = client.chat.completions.create(
-        #model="gpt-4-1106-preview",
         model="gpt-3.5-turbo-1106",
         messages=[
             {
                 "role": "system",
-                "content": "You are a service to provide json output for a conversation simulator. The user prompt will have all the instructions you require."
+                "content": system_prompt
             },
             {
                 "role": "user",
-                "content": prompt
+                "content": user_prompt
             }
         ],
         response_format={ "type": "json_object" },
@@ -51,15 +55,13 @@ for i in tqdm(range(number_of_simulations), desc="Simulating conversations"):
         timeout=30,
     )
 
-    # print(response)
-    # exit(1)
-
     # Extract the generated message from the API response
     message = response.choices[0].message.content
 
     # Save the conversation as a JSON file
-    filename = f"simulation_{i+1}.json"
+    filename = f"{output_folder}/simulation_{i+1}.json"
     with open(filename, 'w') as file:
-        json.dump({'prompt': prompt, 'message': message}, file)
+        json.dump({'prompt': prompt, 'message': message}, file, indent=4)  # Pretty print
 
     logging.info(f"Simulation {i+1} completed and saved as {filename}")
+    exit(1)
