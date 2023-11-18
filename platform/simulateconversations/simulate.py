@@ -1,7 +1,8 @@
 import json
 import logging
 import os
-from openai import OpenAI
+import backoff
+from openai import OpenAI, OpenAIError
 from dotenv import load_dotenv
 from tqdm import tqdm
 import concurrent.futures
@@ -14,6 +15,8 @@ load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 number_of_simulations = 100
 concurrent_simulations = 10  # Number of simulations to run concurrently
+number_of_simulations = 1000
+concurrent_simulations = 15
 
 # Specify the folder to save the JSON files
 output_folder = "../../data/simulations"
@@ -27,22 +30,31 @@ user_prompt_file = "../../docs/prompts/prompt-simulation-lextranscripts-user.md"
 with open(user_prompt_file, 'r') as file:
     user_prompt = file.read()
 
+# Backoff function for handling rate limits
+@backoff.on_exception(backoff.expo, OpenAIError)
+def completions_with_backoff(**kwargs):
+    return client.chat.completions.create(**kwargs)
+
+def get_response():
+    # Generate the conversation using OpenAI's chat completion API
+    response = completions_with_backoff(
+        model="gpt-3.5-turbo-1106",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        max_tokens=1024,
+        n=1,
+        stop=None,
+        temperature=0.7,
+        timeout=30,
+    )
+    return response
+
 # Function to handle each simulation
 def handle_simulation(i):
     try:
-        # Generate the conversation using OpenAI's chat completion API
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo-1106",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            max_tokens=1024,
-            n=1,
-            stop=None,
-            temperature=0.7,
-            timeout=30,
-        )
+        response = get_response()
 
         # Extract the generated message from the API response
         message = response.choices[0].message.content
@@ -51,7 +63,7 @@ def handle_simulation(i):
         message_json = json.loads(message)
 
         # Save the conversation as a JSON file
-        filename = f"{output_folder}/simulation_{i+1}.json"
+        filename = f"{output_folder}/simulation_002{i+1}.json"
         with open(filename, 'w') as file:
             json.dump(message_json, file, indent=4)  # Pretty print
 
