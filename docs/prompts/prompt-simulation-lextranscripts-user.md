@@ -1,4 +1,8 @@
-You task is to simulate a conversation between a person in an affected area for a bushfire evacuation in Gippsland VIC. Provide the response in the following format for Lex:
+You task is to simulate a conversation between a person in an affected area for a bushfire evacuation in Gippsland VIC.
+
+This should be the full conversation, including the initial greeting and the final goodbye.
+
+Provide the response in the following format for Lex:
 ```
 {
     "Participants": [
