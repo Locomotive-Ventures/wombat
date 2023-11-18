@@ -72,4 +72,4 @@ for i in tqdm(range(number_of_simulations), desc="Simulating conversations"):
 
 
     logging.info(f"Simulation {i+1} completed and saved as {filename}")
-    exit(1)
+    # exit(1)
