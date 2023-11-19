@@ -3,8 +3,19 @@ import os
 import logging
 from openai import OpenAI, OpenAIError
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# Get API key
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("Missing OPENAI_API_KEY environment variable")
+
+# Environment check
+environment = os.getenv("ENVIRONMENT", "development")
+
+# Configure logging based on environment
+if environment == "production":
+    logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+else:
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 def lambda_handler(event, context):
     try:
@@ -29,11 +40,6 @@ def lambda_handler(event, context):
 
 def get_openai_client():
     try:
-        # Get API key
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise ValueError("Missing OPENAI_API_KEY environment variable")
-
         # Initialize the OpenAI client
         client = OpenAI(api_key=api_key)
         return client
