@@ -39,5 +39,4 @@ start-ngrok:
 .PHONY: test
 test:
 	@echo "Testing Flask app with curl..."
-	# Replace <json_payload> with your actual JSON payload for testing
 	curl -X POST http://localhost:5000/message -H "Content-Type: application/json" -d '{"message": "Hello"}'
