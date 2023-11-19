@@ -2,11 +2,20 @@ import json
 import os
 from openai import OpenAI
 
-def lambda_handler(event, context):
-    # Initialize OpenAI client
+def get_openai_client():
+    # Get api key
     api_key = os.getenv("OPENAI_API_KEY")
-    client = OpenAI(api_key=api_key)
 
+    # Load the OpenAI client
+    try:
+        client = OpenAI(api_key=api_key)
+    except Exception as e:
+        print("Failed to load OpenAI client")
+        print(e)
+        raise e
+    return client
+
+def lambda_handler(event, context):
     # Extract input from the event object
     user_input = event['queryStringParameters']['message']
 
@@ -14,6 +23,7 @@ def lambda_handler(event, context):
     try:
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
+            response_format={ "type": "json_object" },
             messages=[
                 {"role": "system", "content": "Your system prompt here"},
                 {"role": "user", "content": user_input}
@@ -35,3 +45,12 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': json.dumps({'error': str(e)})
         }
+
+if __name__ == "__main__":
+    client = get_openai_client()
+    event = {
+        'queryStringParameters': {
+            'message': 'Hello, how are you?'
+        }
+    }
+    print(lambda_handler(event, None))
