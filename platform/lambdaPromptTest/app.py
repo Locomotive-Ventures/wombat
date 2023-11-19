@@ -2,6 +2,16 @@ import json
 import os
 from openai import OpenAI
 
+def lambda_handler(event, context):
+    # Generate the response using OpenAI's chat completion API
+    response = get_openai_response(event)
+    response = {
+        'statusCode': 200,
+        'body': json.dumps({'response': response})
+    }
+    # Return the response
+    return response
+
 def get_openai_client():
     # Get api key
     api_key = os.getenv("OPENAI_API_KEY")
@@ -15,7 +25,7 @@ def get_openai_client():
         raise e
     return client
 
-def lambda_handler(event, context):
+def get_openai_response(event):
     # Extract input from the event object
     user_input = event['queryStringParameters']['message']
 
@@ -23,7 +33,7 @@ def lambda_handler(event, context):
     try:
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
-            response_format={ "type": "json_object" },
+            #response_format={ "type": "json_object" },
             messages=[
                 {"role": "system", "content": "Your system prompt here"},
                 {"role": "user", "content": user_input}
