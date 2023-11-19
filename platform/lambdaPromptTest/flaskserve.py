@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
-import app  # Import functions from app.py
+import app as app_module  # Renaming the imported module to avoid conflict
 
-app = Flask(__name__)
+flask_app = Flask(__name__)  # Renaming the Flask app instance
 
-@app.route('/message', methods=['POST'])
+@flask_app.route('/message', methods=['POST'])
 def handle_message():
     # Extract the message from the POST request
     data = request.json
@@ -18,10 +18,10 @@ def handle_message():
     }
 
     # Use the lambda_handler function from app.py
-    response = app.lambda_handler(event, None)
+    response = app_module.lambda_handler(event, None)
 
     # Return the response as JSON
     return jsonify(response)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    flask_app.run(debug=True)
