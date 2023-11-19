@@ -3,29 +3,31 @@ import os
 from openai import OpenAI
 
 def lambda_handler(event, context):
+    # Initialize the OpenAI client
+    client = get_openai_client()
+
     # Generate the response using OpenAI's chat completion API
-    response = get_openai_response(event)
-    response = {
-        'statusCode': 200,
-        'body': json.dumps({'response': response})
-    }
+    response_content = get_openai_response(event, client)
+
     # Return the response
-    return response
+    return {
+        'statusCode': 200,
+        'body': json.dumps({'response': response_content})
+    }
 
 def get_openai_client():
-    # Get api key
+    # Get API key
     api_key = os.getenv("OPENAI_API_KEY")
 
-    # Load the OpenAI client
+    # Initialize the OpenAI client
     try:
         client = OpenAI(api_key=api_key)
+        return client
     except Exception as e:
-        print("Failed to load OpenAI client")
-        print(e)
+        print("Failed to load OpenAI client:", e)
         raise e
-    return client
 
-def get_openai_response(event):
+def get_openai_response(event, client):
     # Extract input from the event object
     user_input = event['queryStringParameters']['message']
 
@@ -33,7 +35,6 @@ def get_openai_response(event):
     try:
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
-            #response_format={ "type": "json_object" },
             messages=[
                 {"role": "system", "content": "Your system prompt here"},
                 {"role": "user", "content": user_input}
@@ -45,16 +46,10 @@ def get_openai_response(event):
 
         # Extract and return the generated message
         generated_message = response.choices[0].message.content
-        return {
-            'statusCode': 200,
-            'body': json.dumps({'response': generated_message})
-        }
+        return generated_message
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': str(e)})
-        }
+        return f"Error: {str(e)}"
 
 if __name__ == "__main__":
     client = get_openai_client()
@@ -63,4 +58,5 @@ if __name__ == "__main__":
             'message': 'Hello, how are you?'
         }
     }
-    print(lambda_handler(event, None))
+    response = lambda_handler(event, None)
+    print(response)
