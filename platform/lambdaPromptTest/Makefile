@@ -2,6 +2,12 @@
 .PHONY: default
 default: help
 
+# Load .env file
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
+
 # Help target to list available commands
 .PHONY: help
 help:
@@ -15,18 +21,23 @@ help:
 .PHONY: start
 start: start-app start-ngrok
 
-# Target to start the application
+# Target to start the Flask application
 .PHONY: start-app
 start-app:
-	@echo "Starting the application..."
-	# Command to start your application
-	python app.py &
+	@echo "Starting the Flask application..."
+	# Command to start your Flask application
+	python flaskserve.py &
 
 # Target to start ngrok
 .PHONY: start-ngrok
 start-ngrok:
 	@echo "Starting ngrok..."
 	# Command to start ngrok and expose your application
-	ngrok http 8000
+	ngrok http 5000
 
-# Add other targets as necessary, like stop, clean, etc.
+# Simple Flask test using curl
+.PHONY: test
+test:
+	@echo "Testing Flask app with curl..."
+	# Replace <json_payload> with your actual JSON payload for testing
+	curl -X POST http://localhost:5000/message -H "Content-Type: application/json" -d '{"message": "Hello"}'
