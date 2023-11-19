@@ -23,5 +23,11 @@ def handle_message():
     # Return the response as JSON
     return jsonify(response)
 
+@flask_app.route('/', defaults={'path': ''})
+@flask_app.route('/<path:path>')
+def default_route(path):
+    # Default message or error
+    return jsonify({'message': 'Please use the "/message" route with a POST request to get a response.'}), 404
+
 if __name__ == '__main__':
     flask_app.run(debug=True)
