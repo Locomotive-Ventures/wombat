@@ -45,11 +45,28 @@ This README document explains the usage of a Python script designed to test a sa
 
 ### Testing
 
-- Send a POST request to your Flask application to test the OpenAI LLM integration:
+1. Validate the python application code is working
+   - Send a POST request to your Flask application to test the OpenAI LLM integration:
+      ```bash
+      curl -X POST -H "Content-Type: application/json" -d '{"prompt": "Hello, my name is"}' http://localhost:5000/complete
+      ```
+   - OR call the test function
+      ```bash
+      make test
+      ```
+2. Run `ngrok` to expose your local Flask application to the internet:
    ```bash
-   curl -X POST -H "Content-Type: application/json" -d '{"prompt": "Hello, my name is"}' http://localhost:5000/complete
+   make start-ngrok
    ```
-- OR call the test function
+
+   Note you might have to sign-up to ngrok to get a token and install locally. You can install on Mac OS using homebrew:
    ```bash
-   make test
+   brew install ngrok
    ```
+
+   Once you have the token you can run:
+   ```bash
+   ngrok authtoken <your-token>
+   ```
+
+   If you have firewall issues, i.e. the localhost is working but not the ngrok url, you may need to update your firewall rules. On Mac OS you can do this by going to System Preferences > Security & Privacy > Firewall > Firewall Options and adding ngrok to the list of allowed applications.
