@@ -1,6 +1,14 @@
 # Define the default target
-.PHONY: all
-all: start
+.PHONY: default
+default: help
+
+# Help target to list available commands
+.PHONY: help
+help:
+	@echo "Available commands:"
+	@echo "  start        : Start the application and ngrok"
+	@echo "  start-app    : Start the Flask application"
+	@echo "  start-ngrok  : Start ngrok to expose Flask application"
 
 # Target to start the application and ngrok
 .PHONY: start
