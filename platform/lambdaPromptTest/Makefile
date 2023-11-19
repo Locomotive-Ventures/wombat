@@ -7,6 +7,7 @@ default: help
 help:
 	@echo "Available commands:"
 	@echo "  start        : Start the application and ngrok"
+	@echo "  test         : Test the Flask application with a curl POST request"
 	@echo "  start-app    : Start the Flask application"
 	@echo "  start-ngrok  : Start ngrok to expose Flask application"
 
