@@ -25,7 +25,7 @@ def handle_message():
     response_dict = json.loads(response['body'])
 
     # Return the desired part of the response
-    return jsonify({'body': response_dict['response'], 'statusCode': response['statusCode']})
+    return response_dict['response']
 
 @flask_app.route('/', defaults={'path': ''})
 @flask_app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
