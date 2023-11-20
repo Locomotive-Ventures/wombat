@@ -21,6 +21,7 @@ Warden Wombat (previously Wombat AI) is a voice AI tool to quickly check on peop
 * [AWS DynamoDB](https://aws.amazon.com/dynamodb/) - Database
 * [AWS Lambda](https://aws.amazon.com/lambda/) - Microservices
 * [Github Actions](https://github.com/features/actions) - CI/CD
+* [OpenAI](https://openai.com/) - Large Language Models
 * [Terraform](https://www.terraform.io/) - Infrastructure as Code
 * [Twilio](https://www.twilio.com/) - Telephony
 * [Supabase](https://supabase.io/) - Auth
