@@ -1,3 +1,5 @@
+![Waden Wombat Logo](assets/branding/wide_logo.png)
+
 # Warden Wombat
 
 ### Overview
