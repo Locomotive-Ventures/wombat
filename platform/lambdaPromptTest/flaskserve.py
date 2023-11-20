@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import json
 import app as app_module  # Renaming the imported module to avoid conflict
 
 flask_app = Flask(__name__)  # Renaming the Flask app instance
@@ -20,8 +21,11 @@ def handle_message():
     # Use the lambda_handler function from app.py
     response = app_module.lambda_handler(event, None)
 
-    # Return the response as JSON
-    return jsonify(response)
+    # Parse the JSON response to a Python dictionary
+    response_dict = json.loads(response['body'])
+
+    # Return the desired part of the response
+    return jsonify({'body': response_dict['response'], 'statusCode': response['statusCode']})
 
 @flask_app.route('/', defaults={'path': ''})
 @flask_app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
