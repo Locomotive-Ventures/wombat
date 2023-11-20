@@ -14,7 +14,8 @@ Warden Wombat (previously Wombat AI) is a voice AI tool to quickly check on peop
 * Liz
 * Olga
 
-### Services Used
+### Services & Technologies User
+
 * [AWS API Gateway](https://aws.amazon.com/api-gateway/) - API
 * [AWS Cloudfront](https://aws.amazon.com/cloudfront/) - CDN
 * [AWS DynamoDB](https://aws.amazon.com/dynamodb/) - Database
