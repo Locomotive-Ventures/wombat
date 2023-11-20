@@ -9,3 +9,12 @@ Wombat AI is a voice AI tool to quickly check on people's safety during disaster
 * Liz
 * Olga
 
+## Services Used
+* [AWS API Gateway](https://aws.amazon.com/api-gateway/) - API
+* [AWS Cloudfront](https://aws.amazon.com/cloudfront/) - CDN
+* [AWS DynamoDB](https://aws.amazon.com/dynamodb/) - Database
+* [AWS Lambda](https://aws.amazon.com/lambda/) - Microservices
+* [Github Actions](https://github.com/features/actions) - CI/CD
+* [Terraform](https://www.terraform.io/) - Infrastructure as Code
+* [Twilio](https://www.twilio.com/) - Telephony
+* [Supabase](https://supabase.io/) - Auth
