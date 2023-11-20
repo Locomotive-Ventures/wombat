@@ -33,10 +33,10 @@ start-app:
 start-ngrok:
 	@echo "Starting ngrok..."
 	# Command to start ngrok and expose your application
-	ngrok http 5000
+	ngrok http 5001
 
 # Simple Flask test using curl
 .PHONY: test
 test:
 	@echo "Testing Flask app with curl..."
-	curl -X POST http://localhost:5000/message -H "Content-Type: application/json" -d '{"message": "Hello"}'
+	curl -X POST http://localhost:5001/message -H "Content-Type: application/json" -d '{"message": "Hello"}'

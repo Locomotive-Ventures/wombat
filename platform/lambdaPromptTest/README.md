@@ -48,7 +48,7 @@ This README document explains the usage of a Python script designed to test a sa
 1. Validate the python application code is working
    - Send a POST request to your Flask application to test the OpenAI LLM integration:
       ```bash
-      curl -X POST -H "Content-Type: application/json" -d '{"prompt": "Hello, my name is"}' http://localhost:5000/complete
+      curl -X POST -H "Content-Type: application/json" -d '{"message": "Hello, my name is"}' http://localhost:5001/message
       ```
    - OR call the test function
       ```bash
