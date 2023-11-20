@@ -1,0 +1,269 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Testing resourses excluding the Caller part
+
+Parameters:
+  QueueName:
+    Type: String
+    Description: The name of the SQS queue
+    Default: contact-queue
+
+Resources:
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        IndexDocument: index.html
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - Id: myS3Origin
+            DomainName: !GetAtt [WebsiteBucket, DomainName]
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentity}
+        Enabled: true
+        DefaultCacheBehavior:
+          TargetOriginId: myS3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+        DefaultRootObject: index.html
+
+  OriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub "OAI for ${WebsiteBucket}"
+
+  ContactQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Ref QueueName
+
+  ContactQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - Ref: ContactQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action:
+              - sqs:SendMessage
+            Resource:
+              Fn::Sub: arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:ContactQueue
+
+  ContactTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: uniqueId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: uniqueId
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  ContactLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ContactLambda}
+      RetentionInDays: 7
+
+  ContactLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.8
+      Code:
+        ZipFile: |
+          import boto3
+          import json
+          def handler(event, context):
+              # will update later, for now what to see what event has
+              return {
+                  'statusCode': 200,
+                  'body': json.dumps('Hello from Lambda!')
+              }
+      Environment:
+        Variables:
+          QUEUE_URL: !Ref ContactQueue
+          TABLE_NAME: !Ref ContactTable
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaSQSDynamoDBPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                Resource: !GetAtt ContactTable.Arn
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: !GetAtt ContactQueue.Arn
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:*
+
+  ContactLambdaEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt ContactQueue.Arn
+      FunctionName: !GetAtt ContactLambda.Arn
+      Enabled: true
+      BatchSize: 1
+
+  ContactAPI:
+    Type: 'AWS::ApiGateway::RestApi'
+    Properties:
+      Name: 'ContactAPI'
+
+  ContactAPIResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId:
+        Ref: 'ContactAPI'
+      ParentId:
+        Fn::GetAtt:
+          - 'ContactAPI'
+          - 'RootResourceId'
+      PathPart: 'message'
+
+  ContactAPIOptionsMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      RestApiId:
+        Ref: 'ContactAPI'
+      ResourceId:
+        Ref: 'ContactAPIResource'
+      HttpMethod: 'OPTIONS'
+      AuthorizationType: 'NONE'
+      Integration:
+        Type: 'MOCK'
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type'"
+              method.response.header.Access-Control-Allow-Methods: "'POST, OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: "Empty"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  ContactAPIMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      RestApiId:
+        Ref: 'ContactAPI'
+      ResourceId:
+        Ref: 'ContactAPIResource'
+      HttpMethod: 'POST'
+      AuthorizationType: 'NONE'
+      Integration:
+        Type: 'AWS'
+        IntegrationHttpMethod: 'POST'
+        Uri:
+          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:sqs:path/${AWS::AccountId}/${QueueName}'
+        Credentials:
+          Fn::GetAtt: 'ContactAPIRole.Arn'
+        RequestParameters:
+          'integration.request.header.Content-Type': "'application/x-www-form-urlencoded'"
+        RequestTemplates:
+          'application/json': !Sub |
+            Action=SendMessage&MessageBody=$util.urlEncode("$input.body")
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: ""
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: "Empty"
+
+  ContactAPIDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId:
+        Ref: ContactAPI
+    DependsOn:
+      - ContactAPIMethod
+
+  MyStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: "Prod"
+      Description: "Production Stage"
+      RestApiId:
+        Ref: ContactAPI
+      DeploymentId:
+        Ref: ContactAPIDeployment
+
+  ContactAPIRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'apigateway.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: 'ContactAPIPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action: 'sqs:SendMessage'
+                Resource:
+                  Fn::GetAtt: 'ContactQueue.Arn'
+
+Outputs:
+  ContactAPIInvokeURL:
+    Description: 'Invoke URL of ContactAPI'
+    Value:
+      Fn::Sub: 'https://${ContactAPI}.execute-api.${AWS::Region}.amazonaws.com/Prod/message'
+  WebsiteURL:
+    Value: !Sub "https://${CloudFrontDistribution.DomainName}"
+  BucketName:
+    Value: !Ref WebsiteBucket
+  OriginAccessIdentity:
+    Value: !Ref OriginAccessIdentity
