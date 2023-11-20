@@ -61,13 +61,16 @@ def get_openai_response(event, client):
         user_input = event['queryStringParameters']['message']
 
         # Generate the response using OpenAI's chat completion API
+        # https://platform.openai.com/docs/guides/text-generation/completions-api
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
             messages=[
-                {"role": "system", "content": "Your system prompt here"},
+                {"role": "system", "content": "You are Wombat AI, an emergency service assistant that is speaking to people in evacuation areas affected by bushfires."},
+                {"role": "user", "content": "Hi"},
+                {"role": "assistant", "content": "Hello, this is Wombat AI calling on behalf of the emergency services. I understand you are located in Gippsland, VIC. Can you confirm your current location for verification?"},
                 {"role": "user", "content": user_input}
             ],
-            max_tokens=1024,
+            max_tokens=300,
             temperature=0.7,
             timeout=30
         )
