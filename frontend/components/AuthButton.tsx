@@ -30,13 +30,20 @@ export default async function AuthButton() {
     }}
     >
       <form action={signOut}>
-        <button className="py-10 px-4  no-underline text-background bg-foreground  transition-colors hover:bg-white hover:text-black flex"
-        style={{ 
+        <button 
+        className="no-underline text-background bg-foreground transition-colors hover:bg-white hover:text-white"
+        style={{
+          width: '15vw',
+          height: '10vw',
           color: 'white',
-          background: '#047857',
-          textAlign: 'right',
-          fontSize: '1rem', 
+          background: '#252422',
+          textAlign: 'center',
+          fontSize: '1rem',
           fontWeight: 'bold',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: 'none', // Add this line to remove the button border
         }}
         >
           Logout
@@ -47,13 +54,17 @@ export default async function AuthButton() {
     <div className='flex'>
       <Link
         href="/login"
-        className="no-underline  py-10 px-20 text-background bg-foreground  transition-colors hover:bg-white hover:text-white"
-        style={{ 
-          color: 'black',
-          background: '#047857',
-          textAlign: 'right',
-          fontSize: '1rem', 
+        className="no-underline text-background bg-foreground transition-colors hover:bg-white hover:text-white "
+        style={{
+          width: '15vw',
+          color: 'white',
+          background: '#252422',
+          textAlign: 'center',
+          fontSize: '1rem',
           fontWeight: 'bold',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
         >
         Login
