@@ -29,7 +29,7 @@ export default async function AddCampaignButton() {
         Welcome {user?.email} !
       </div>
       <div className="w-1/2 flex items-end justify-end">
-      <Link href="/"
+      <Link href="/addcampaign"
       style={{
         color: 'black',
         background: '#CCC5B9',
