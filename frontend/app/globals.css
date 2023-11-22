@@ -18,11 +18,19 @@
       --foreground: 200 20% 96%;
     }
   }
+
+  /* Apply colors to Tailwind CSS variables */
+  :root {
+    --tw-bg-main: hsl(var(--background));
+    --tw-bg-btn: hsl(var(--btn-background));
+    --tw-bg-btn-hover: hsl(var(--btn-background-hover));
+    --tw-text-main: hsl(var(--foreground));
+  }
 }
 
 @layer base {
   * {
-    @apply border-foreground/20;
+    @apply border-t-foreground/20;
   }
 }
 

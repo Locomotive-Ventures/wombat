@@ -24,11 +24,21 @@ export default async function AuthButton() {
     <div className="flex items-center gap-4 flex"
     style={{ 
       color: 'white',
-      background: 'black',
+      background: '#403D39',
       textAlign: 'right',
       fontWeight: 'bold',
     }}
     >
+      <span
+        style={{
+          fontSize: '0.8vw', 
+          whiteSpace: 'nowrap', 
+          overflow: 'hidden', 
+          textOverflow: 'ellipsis', 
+        }}
+      >
+        {user.email}:
+      </span>
       <form action={signOut}>
         <button 
         className="no-underline text-background bg-foreground transition-colors hover:bg-white hover:text-white"

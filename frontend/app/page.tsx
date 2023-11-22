@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import Header from '@/components/Header'
 import Head from 'next/head';
-
+import AddCampaignButton from '../components/AddCampaignButton'
 
 
 export default async function Index() {
@@ -17,13 +17,16 @@ export default async function Index() {
 //:)\?\?/?/:(>'-'
 
   return (
-    <div className='w-full'>
+    <div className='w-full ' style={{background: '#FFFCF2',}}>
       <div className=' w-full flex'>
         <Head>
           <link rel="msapplication-config" href="/browserconfig.xml"></link>
         </Head>
         <Header/>
         <AuthButton/>
+      </div>
+      <div className='w-full flex'>
+        <AddCampaignButton/>
       </div>
     </div>
       
