@@ -23,6 +23,12 @@ Resources:
             DomainName: !GetAtt [WebsiteBucket, DomainName]
             S3OriginConfig:
               OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentity}
+          - Id: DynamoDBAPIOrigin
+            DomainName: !Sub '${DynamoDBAPI}.execute-api.${AWS::Region}.amazonaws.com'
+            CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
         Enabled: true
         DefaultCacheBehavior:
           TargetOriginId: myS3Origin
@@ -89,9 +95,11 @@ Resources:
         ZipFile: |
           import boto3
           import json
+          import os
           dynamodb = boto3.resource('dynamodb')
           def handler(event, context):
-              table = dynamodb.Table('test-stack-ContactTable-4492EILTP3BR')
+              table_name = os.environ['TABLE_NAME']
+              table = dynamodb.Table(table_name)
               for record in event['Records']:
                   message_body = json.loads(record['body'])
                   response = table.put_item(Item=message_body)
@@ -178,7 +186,7 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
             ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Methods: "'POST, OPTIONS'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
             ResponseTemplates:
@@ -215,12 +223,22 @@ Resources:
             Action=SendMessage&MessageBody=$util.urlEncode("$input.body")
         IntegrationResponses:
           - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'POST, OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
             ResponseTemplates:
               application/json: ""
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
             application/json: "Empty"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Credentials: true
 
   ContactAPIDeployment:
     Type: AWS::ApiGateway::Deployment
@@ -229,6 +247,7 @@ Resources:
         Ref: ContactAPI
     DependsOn:
       - ContactAPIMethod
+      - ContactAPIOptionsMethod
 
   MyStage:
     Type: AWS::ApiGateway::Stage
@@ -259,6 +278,126 @@ Resources:
                 Action: 'sqs:SendMessage'
                 Resource:
                   Fn::GetAtt: 'ContactQueue.Arn'
+
+  DynamoDBAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: DynamoDBAPI
+
+  DynamoDBAPIResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref DynamoDBAPI
+      ParentId: !GetAtt DynamoDBAPI.RootResourceId
+      PathPart: 'data'
+
+  DynamoDBAPIMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref DynamoDBAPI
+      ResourceId: !Ref DynamoDBAPIResource
+      HttpMethod: 'GET'
+      AuthorizationType: 'NONE'
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: 'POST'
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:dynamodb:action/Query'
+        Credentials: !GetAtt DynamoDBAPIRole.Arn
+        RequestTemplates:
+          application/json: |
+            {
+              "TableName": "${ContactTable}",
+              "KeyConditionExpression": "uniqueId = :v1",
+              "ExpressionAttributeValues": {
+                ":v1": {"S": "$input.params('uniqueId')"}
+              }
+            }
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET, OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: |
+                #set($inputRoot = $input.path('$'))
+                #if($inputRoot.Items.size() == 0)
+                  {"message": "No item found"}
+                #else
+                  $inputRoot.Items[0]
+                #end
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+          ResponseModels:
+            application/json: "Empty"
+
+  DynamoDBAPIOPTIONSMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref DynamoDBAPI
+      ResourceId: !Ref DynamoDBAPIResource
+      HttpMethod: OPTIONS
+      AuthorizationType: 'NONE'
+      Integration:
+        Type: 'MOCK'
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'GET, OPTIONS'"
+            ResponseTemplates:
+              application/json: ''
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: "Empty"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  DynamoDBAPIRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'apigateway.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: 'DynamoDBAPIPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'dynamodb:Query'
+                Resource: !GetAtt ContactTable.Arn
+
+  DynamoDBAPIDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref DynamoDBAPI
+      Description: 'API Deployment'
+    DependsOn:
+      - DynamoDBAPIMethod
+      - DynamoDBAPIOPTIONSMethod
+
+  DynamoDBAPIStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: 'Prod'
+      RestApiId: !Ref DynamoDBAPI
+      DeploymentId: !Ref DynamoDBAPIDeployment
 
 Outputs:
   ContactAPIInvokeURL:
