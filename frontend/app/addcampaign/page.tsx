@@ -14,6 +14,14 @@ export default async function Index() {
     data: { user },
   } = await supabase.auth.getUser()
 
+
+  const handleSubmit = async (formData: FormData) => {
+    "use server"
+    //function successfully triggered. 
+    //Input validation
+    //Unique id generation
+    //pass data to dynamo
+  };
   return (
     <div className='w-full ' style={{background: '#FFFCF2',}}>
       <div className=' w-full flex'>
@@ -53,7 +61,7 @@ export default async function Index() {
             >
                 <div className="w-1/2 flex ">
                     <fieldset name="Campaign Information"
-                    style={{border: '1px solid #ccc', /* Add a border to the fieldset */
+                    style={{border: '1px solid #ccc',
                     padding: '10px',}}
                     >
                         <legend>Campaign Information</legend>
@@ -69,17 +77,71 @@ export default async function Index() {
                     </fieldset>
                 </div>
                 <div className="w-1/2 flex ">
-                    <fieldset name="Caller Information">
+                    <fieldset name="Caller Information"
+                    style={{border: '1px solid #ccc',
+                    padding: '10px',}}
+                    >
                         <legend>Caller Information</legend>
                         <label >Paste All Phone Numbers Below: </label><br></br>
-                        <textarea></textarea>
+                        <textarea
+                          id="my-textarea"
+                          name="my-textarea"
+                          rows={4}
+                          style={{
+                            width: '40vw',
+                            height: '20vw',
+                            padding: '0.5rem',
+                            border: '2px solid #cbd5e0',
+                            borderRadius: '0.375rem',
+                            overflow: 'auto',
+                            outline: 'none',
+                            transition: 'border-color 0.15s ease-in-out',
+                          }}
+                          className="focus:border-blue-500"
+                          />
                     </fieldset>
                 </div>
+            </div>
+            <div className="w-full flex" style={{
+              padding: '1.5rem',
+              color: 'black',
+              background: '#FFFCF2',
+              textAlign: 'left',
+              fontSize: '2vh',
+              fontWeight: 'bold',
+              display: 'flex',
+            }}>
+              <div
+                className="w-1/2 flex "
+              ></div>
+              <div
+                className="w-1/2 flex"
+              >
+                <label htmlFor="agree" className="block text-right pr-4">
+                  <input type="checkbox" id="agree" name="agree" required className="mr-2" />
+                  I confirm these people will be called, and I have authorization to make these calls.
+                </label>
+              </div>
+            </div>
+            <div className="w-full flex" style={{
+              padding: '1.5rem',
+              color: 'black',
+              background: '#FFFCF2',
+              textAlign: 'left',
+              fontSize: '2vh',
+              fontWeight: 'bold',
+              display: 'flex',
+            }}>
+              <div className='w-1/2 flex'></div>
+              <div
+              className='w-1/2 flex'
+              >
+                <button type="button" className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded">Cancel</button>
+                <button type="submit" formAction={handleSubmit} className="bg-gray-300 hover:bg-blue-600 text-black px-4 py-2 rounded">Submit</button>
+              </div>
             </div>
         </form>
       </div>
     </div>
-   
   )
 }
-//
