@@ -37,7 +37,7 @@ module "frontend" {
 }
 
 module "operations" {
-  source             = "./operations"
+  source = "./operations"
 }
 module "storage" {
   source = "./storage"
