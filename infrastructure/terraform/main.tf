@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.26"
     }
+    twilio = {
+      source = "twilio/twilio"
+      version = "0.18.34"
+    }
   }
 
   required_version = "~> 1.6.4"
@@ -17,6 +21,11 @@ terraform {
 
 provider "aws" {
   region = "ap-southeast-2"
+}
+
+provider "twilio" {
+  username = var.twilio_account_sid
+  password = var.twilio_auth_token
 }
 
 module "compute" {
