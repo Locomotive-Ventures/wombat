@@ -28,17 +28,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'ap-southeast-2'
 
-      # Configure Terraform backend with S3
-      - name: Configure Terraform Backend
-        run: |
-          terraform -chdir=infrastructure/terraform init -input=false -backend-config="s3.tfvars"
-
-      # Generates an execution plan for Terraform
-      - name: Terraform Plan
-        id: plan
-        run: |
-          terraform -chdir=infrastructure/terraform plan -input=false -out=tfplan
-
       # Post a running comment when Terraform apply starts
       - name: Post Running Comment
         if: startsWith(github.event.comment.body, 'apply')
@@ -54,6 +43,16 @@ jobs:
               body: ':hourglass_flowing_sand: Terraform apply is running...'
             });
 
+      # Configure Terraform backend with S3
+      - name: Configure Terraform Backend
+        run: |
+          terraform -chdir=infrastructure/terraform init -input=false -backend-config="s3.tfvars"
+
+      # Generates an execution plan for Terraform
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform -chdir=infrastructure/terraform plan -input=false -out=tfplan
       # Apply the changes required to reach the desired state of the configuration
       - name: Terraform Apply
         run: terraform -chdir=infrastructure/terraform apply -auto-approve -input=false tfplan
