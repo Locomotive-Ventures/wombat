@@ -33,7 +33,7 @@ jobs:
 
       # Install the latest version of Terraform CLI
       - name: Install Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v3.0.0
 
       # Configure AWS CLI (required for S3 backend)
       - name: Configure AWS Credentials
@@ -52,13 +52,17 @@ jobs:
         run: |
           terraform -chdir=infrastructure/terraform init -input=false -backend-config="s3.tfvars"
 
+      # Checks that all Terraform configuration files adhere to a canonical format
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
       # Generates an execution plan for Terraform
       - name: Terraform Plan
         id: plan
         run: |
           terraform -chdir=infrastructure/terraform plan -input=false -out=tfplan
           terraform -chdir=infrastructure/terraform show -no-color tfplan > plan.txt
-          echo "::set-output name=plan_output::$(< plan.txt)"
         continue-on-error: true
 
       - name: Upload Terraform Plan
@@ -84,7 +88,7 @@ jobs:
           body: |
             **Terraform Plan Output:**
             ```
-            ${{ env.TF_PLAN }}
+            ${{ steps.plan.outputs.stdout }}
             ```
 
       # On push to "main", build or change infrastructure according to Terraform configuration files
