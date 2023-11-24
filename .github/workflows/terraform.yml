@@ -13,7 +13,7 @@ permissions:
 #concurrency, we should only ever run this once across the entire repository
 concurrency:
   group: terraform
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   terraform:
@@ -71,7 +71,9 @@ jobs:
       - name: Read Terraform Plan
         id: read_plan
         run: |
-          echo "::set-env name=TF_PLAN::$(cat plan.txt)"
+          echo "TF_PLAN<<EOF" >> $GITHUB_ENV
+          cat plan.txt >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Comment Terraform Plan
         uses: Locomotive-Ventures/create-or-update-comment@main
