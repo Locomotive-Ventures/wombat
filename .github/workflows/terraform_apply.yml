@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   terraform-apply:
-    # if github issue comment == apply
+    if: github.event.issue.pull_request != null && contains(github.event.comment.body, 'apply')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
