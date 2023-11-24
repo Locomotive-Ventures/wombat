@@ -10,10 +10,10 @@ permissions:
   contents: read
   pull-requests: write
 
-#cocurrency, we should only ever run this once across the entire repository
+#concurrency, we should only ever run this once across the entire repository
 concurrency:
   group: terraform
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   terraform:
@@ -33,7 +33,7 @@ jobs:
 
       # Install the latest version of Terraform CLI
       - name: Install Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v3.0.0
 
       # Configure AWS CLI (required for S3 backend)
       - name: Configure AWS Credentials
@@ -52,6 +52,11 @@ jobs:
         run: |
           terraform -chdir=infrastructure/terraform init -input=false -backend-config="s3.tfvars"
 
+      # Checks that all Terraform configuration files adhere to a canonical format
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
       # Generates an execution plan for Terraform
       - name: Terraform Plan
         id: plan
@@ -67,17 +72,31 @@ jobs:
           name: terraform-plan
           path: plan.txt
 
-      - name: Comment Terraform Plan
-        uses: peter-evans/create-or-update-comment@v3
+      - uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            **Terraform Plan Output:**
-            ```
-            ${{ steps.plan.outputs.plan_output }}
-            ```
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
 
       # On push to "main", build or change infrastructure according to Terraform configuration files
       - name: Terraform Apply

@@ -18,3 +18,18 @@ terraform {
 provider "aws" {
   region = "ap-southeast-2"
 }
+
+module "compute" {
+  source = "./compute"
+}
+
+module "frontend" {
+  source = "./frontend"
+}
+
+module "operations" {
+  source = "./operations"
+}
+module "storage" {
+  source = "./storage"
+}
