@@ -13,7 +13,7 @@ terraform {
     key            = "infrastructure/terraform/terraform.tfstate"
     region         = "ap-southeast-2"
     encrypt        = true
-    dynamodb_table = "tf-statelock"
+    dynamodb_table = "wombat-tf-statelock"
   }
 }
 
