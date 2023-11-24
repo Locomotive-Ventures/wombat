@@ -71,7 +71,7 @@ jobs:
       - name: Read Terraform Plan
         id: read_plan
         run: |
-          echo "::set-env name=TF_PLAN::$(cat plan-output/plan.txt)"
+          echo "::set-env name=TF_PLAN::$(cat plan.txt)"
 
       - name: Comment Terraform Plan
         uses: Locomotive-Ventures/create-or-update-comment@main
