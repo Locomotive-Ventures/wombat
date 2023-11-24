@@ -1,5 +1,5 @@
 .ONESHELL:
-.PHONY: all check help precommit switch init plan apply providers lint secure clean TERRAFORMBINARY
+.PHONY: all help install check precommit tfswitch tfinit tfplan tfapply tfproviders lint secure clean TERRAFORMBINARY
 .DEFAULT_GOAL = help
 SHELL := /bin/zsh
 APPNAME = wardenwombat
