@@ -94,13 +94,13 @@ tfinit: tfstage
 	@$(TERRAFORMBINARY) -chdir=$(p) init -input=false -upgrade -backend-config=s3.tfvars
 
 tfplan: tfstage
-	@$(TERRAFORMBINARY) -chdir=$(p) plan -input=false -backend-config=s3.tfvars
+	@$(TERRAFORMBINARY) -chdir=$(p) plan -input=false
 
 tfapply: tfstage
-	@$(TERRAFORMBINARY) -chdir=$(p) apply -input=false -auto-approve -backend-config=s3.tfvars
+	@$(TERRAFORMBINARY) -chdir=$(p) apply -input=false -auto-approve
 
 tfproviders: tfstage
-	@$(TERRAFORMBINARY) -chdir=$(p) providers -backend-config=s3.tfvars
+	@$(TERRAFORMBINARY) -chdir=$(p) providers
 
 tfreconfigure: tfstage
 	@$(TERRAFORMBINARY) -chdir=$(p) init -migrate-state -backend-config=s3.tfvars
