@@ -1,8 +1,18 @@
 .ONESHELL:
 .PHONY: all help install check precommit tfswitch tfinit tfplan tfapply tfproviders tfreconfigure lint secure clean
 .DEFAULT_GOAL = help
+
+# Shell and Environment
 SHELL := /bin/zsh
+include .env
+export
+
+# Settings
 APPNAME = wardenwombat
+p = infrastructure/terraform
+DEBUG_MODE = false
+
+# Binary and Variables
 BLUE=\033[0;34m
 NC=\033[0m
 SRC=.
@@ -13,8 +23,6 @@ CHECKTFLINT := $(shell tflint --version 2>/dev/null)
 CHECKTFSEC := $(shell tfsec --version 2>/dev/null)
 CHECKTFORM := $(shell terraformer --version 2>/dev/null)
 TERRAFORMBINARY := $(shell which terraform)
-p = infrastructure/terraform
-DEBUG_MODE = false
 
 header:
 	@echo -e "$(BLUE)--------------------------------------------------"
