@@ -29,32 +29,32 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v1
 
-      # # Configure AWS CLI (required for S3 backend)
-      # - name: Configure AWS Credentials
-      #   uses: aws-actions/configure-aws-credentials@v2
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: 'your-aws-region'
+      # Configure AWS CLI (required for S3 backend)
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'your-aws-region'
 
-      # # Configure Terraform backend with S3
-      # - name: Configure Terraform Backend
-      #   run: |
-      #     terraform init -backend-config="backend.tfvars"
+      # Configure Terraform backend with S3
+      - name: Configure Terraform Backend
+        run: |
+          terraform init -backend-config="backend.tfvars"
 
-      # # Initialize a new or existing Terraform working directory
-      # - name: Terraform Init
-      #   run: terraform init
+      # Initialize a new or existing Terraform working directory
+      - name: Terraform Init
+        run: terraform init
 
-      # # Checks that all Terraform configuration files adhere to a canonical format
-      # - name: Terraform Format
-      #   run: terraform fmt -check
+      # Checks that all Terraform configuration files adhere to a canonical format
+      - name: Terraform Format
+        run: terraform fmt -check
 
-      # # Generates an execution plan for Terraform
-      # - name: Terraform Plan
-      #   run: terraform plan -input=false
+      # Generates an execution plan for Terraform
+      - name: Terraform Plan
+        run: terraform plan -input=false
 
-      # # On push to "main", build or change infrastructure according to Terraform configuration files
-      # - name: Terraform Apply
-      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      #   run: terraform apply -auto-approve -input=false
+      # On push to "main", build or change infrastructure according to Terraform configuration files
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false
