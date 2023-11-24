@@ -95,7 +95,7 @@ jobs:
               // Check if the comment is from github-actions[bot] and contains the Terraform plan text
               if (comment.user.login === 'github-actions[bot]' && comment.body.includes('Terraform Plan 📖')) {
                 // Delete the comment
-                await github.rest.issues.minimizeComment({
+                await github.rest.issues.deleteComment({
                   owner,
                   repo,
                   comment_id: comment.id
@@ -121,7 +121,7 @@ jobs:
             </details>
 
             *Comment with \`apply\` to run Terraform apply*
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
