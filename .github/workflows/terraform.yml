@@ -135,7 +135,8 @@ jobs:
 
   terraform-apply:
     name: 'Terraform Apply'
-    if: github.event_name == 'issue_comment'
+    # if github issue comment == apply
+    if: github.event_name == 'issue_comment' && contains(github.event.comment.body, 'apply')
     runs-on: ubuntu-latest
     needs: [terraform]
     steps:
