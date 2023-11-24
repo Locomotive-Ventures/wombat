@@ -9,9 +9,9 @@ terraform {
   required_version = "~> 1.6.4"
 
   backend "s3" {
-    bucket         = "tf-s3-backend"
+    bucket         = "wombat-tf-s3-backend"
     key            = "infrastructure/terraform/terraform.tfstate"
-    region         = "ap-southeast-2" # Change this to your desired AWS region
+    region         = "ap-southeast-2"
     encrypt        = true
     dynamodb_table = "tf-statelock"
   }
