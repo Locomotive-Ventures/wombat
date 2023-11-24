@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  terraform:
+  terraform-plan:
     name: 'Terraform Plan'
     runs-on: ubuntu-latest
     environment: production

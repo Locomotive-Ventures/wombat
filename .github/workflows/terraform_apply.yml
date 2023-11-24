@@ -1,4 +1,4 @@
-name: 'Terraform Apply on Comment'
+name: 'Terraform Apply'
 
 on:
   issue_comment:
@@ -28,6 +28,21 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'ap-southeast-2'
 
+      # Post a running comment when Terraform apply starts
+      - name: Post Running Comment
+        if: startsWith(github.event.comment.body, 'apply')
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = context.payload.issue.number;
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              body: ':hourglass_flowing_sand: Terraform apply is running...'
+            });
+
       # Configure Terraform backend with S3
       - name: Configure Terraform Backend
         run: |
@@ -38,21 +53,35 @@ jobs:
         id: plan
         run: |
           terraform -chdir=infrastructure/terraform plan -input=false -out=tfplan
-
       # Apply the changes required to reach the desired state of the configuration
       - name: Terraform Apply
         run: terraform -chdir=infrastructure/terraform apply -auto-approve -input=false tfplan
 
-      # Auto-merge pull request as changes have been applied
-      - name: Auto-Merge Pull Request
+      # Post a success comment
+      - name: Post Success Comment
+        if: success()
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const pull_number = context.payload.issue.number;
-            await github.rest.pulls.merge({
+            const issue_number = context.payload.issue.number;
+            github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: pull_number,
-              merge_method: 'merge'  # Choose 'merge', 'squash', or 'rebase'
+              issue_number: issue_number,
+              body: ':rocket: Terraform apply successful! Attempting to merge pull request...'
+            });
+
+      # Auto-apply "automerge" label to pull request
+      - name: Auto-Label Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = context.payload.pull_request.number;
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              labels: ['automerge']
             });
