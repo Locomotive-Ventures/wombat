@@ -70,5 +70,14 @@ help: check
 	@echo ' make clean                remove all local caches                     '
 	@echo ' '
 
+precommit: check
+	@echo -e "${BLUE}🛫 Running pre-commit scripts against source and test files...${NC}\n"
+	@pre-commit run --all-files
+
+install:
+	@brew install pre-commit gawk terraform-docs tflint tfsec coreutils
+	@brew install warrensbox/tap/tfswitch
+	@brew install --HEAD terraformer
+
 tfswitch:
 	@tfswitch --chdir=$(p) --latest
