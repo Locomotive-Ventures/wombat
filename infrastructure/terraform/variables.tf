@@ -2,8 +2,9 @@
 # Path: infrastructure/terraform/variables.tf
 
 # Twilio variables
-variable "twilio_account_sid" {}
-variable "twilio_auth_token" {}
-variable "australian_voice_number" {
-  default = "+61259505161"
+variable "twilio_account_sid" {
+  type        = string
+}
+variable "twilio_auth_token" {
+  type        = string
 }
