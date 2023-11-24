@@ -1,5 +1,5 @@
 .ONESHELL:
-.PHONY: all help install check precommit tfswitch tfinit tfplan tfapply tfproviders lint secure clean TERRAFORMBINARY
+.PHONY: all help install check precommit tfswitch tfinit tfplan tfapply tfproviders lint secure clean
 .DEFAULT_GOAL = help
 SHELL := /bin/zsh
 APPNAME = wardenwombat
@@ -12,6 +12,7 @@ CHECKTFSWITCH := $(shell tfswitch --version 2>/dev/null)
 CHECKTFLINT := $(shell tflint --version 2>/dev/null)
 CHECKTFSEC := $(shell tfsec --version 2>/dev/null)
 CHECKTFORM := $(shell terraformer --version 2>/dev/null)
+TERRAFORMBINARY := $(shell which terraform)
 p = infrastructure/terraform
 
 header:
