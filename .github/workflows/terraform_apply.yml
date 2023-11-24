@@ -15,7 +15,6 @@ concurrency:
 jobs:
   terraform-apply:
     # if github issue comment == apply
-    if: github.event_name == 'issue_comment' && contains(github.event.comment.body, 'apply')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
