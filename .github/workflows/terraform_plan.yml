@@ -1,14 +1,9 @@
 name: 'Terraform'
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
-  issue_comment:
-    types: [created]
 
 permissions:
   contents: read
@@ -22,7 +17,6 @@ concurrency:
 jobs:
   terraform:
     name: 'Terraform Plan'
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     environment: production
 
@@ -132,50 +126,3 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
-
-  terraform-apply:
-    name: 'Terraform Apply'
-    # if github issue comment == apply
-    if: github.event_name == 'issue_comment' && contains(github.event.comment.body, 'apply')
-    runs-on: ubuntu-latest
-    needs: [terraform]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      # Configure AWS CLI (required for S3 backend)
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'ap-southeast-2'
-
-      # Configure Terraform backend with S3
-      - name: Configure Terraform Backend
-        run: |
-          terraform -chdir=infrastructure/terraform init -input=false -backend-config="s3.tfvars"
-
-      # Generates an execution plan for Terraform
-      - name: Terraform Plan
-        id: plan
-        run: |
-          terraform -chdir=infrastructure/terraform plan -input=false -out=tfplan
-
-      # Apply the changes required to reach the desired state of the configuration
-      - name: Terraform Apply
-        run: terraform -chdir=infrastructure/terraform apply -auto-approve -input=false tfplan
-
-      # Auto-merge pull request as changes have been applied
-      - name: Auto-Merge Pull Request
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const pull_number = context.payload.issue.number;
-            await github.rest.pulls.merge({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pull_number,
-              merge_method: 'merge'  # Choose 'merge', 'squash', or 'rebase'
-            });
