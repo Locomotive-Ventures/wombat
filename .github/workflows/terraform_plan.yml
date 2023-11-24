@@ -1,10 +1,11 @@
 name: 'Terraform'
 
 on:
-  push:
+  pull_request:
+    paths:
+      - 'infrastructure/**'
     branches:
       - main
-  pull_request:
 
 permissions:
   contents: read
@@ -17,7 +18,7 @@ concurrency:
 
 jobs:
   terraform:
-    name: 'Terraform'
+    name: 'Terraform Plan'
     runs-on: ubuntu-latest
     environment: production
 
@@ -72,6 +73,35 @@ jobs:
           name: terraform-plan
           path: plan.txt
 
+      - name: Mark Previous Plan Comments as Outdated
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = context.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // List comments
+            const comments = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number
+            });
+
+            // Loop through the comments
+            for (const comment of comments.data) {
+              // Check if the comment is from github-actions[bot] and contains the Terraform plan text
+              if (comment.user.login === 'github-actions[bot]' && comment.body.includes('Terraform Plan 📖')) {
+                // Delete the comment
+                await github.rest.issues.deleteComment({
+                  owner,
+                  repo,
+                  comment_id: comment.id
+                });
+              }
+            }
+
       - uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
         env:
@@ -89,7 +119,8 @@ jobs:
 
             </details>
 
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            *Comment with \`apply\` to run Terraform apply*
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -97,8 +128,3 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
-
-      # On push to "main", build or change infrastructure according to Terraform configuration files
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform -chdir=infrastructure/terraform apply tfplan -auto-approve -input=false
