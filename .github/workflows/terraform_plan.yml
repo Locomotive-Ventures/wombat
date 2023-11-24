@@ -2,6 +2,8 @@ name: 'Terraform'
 
 on:
   pull_request:
+    paths:
+      - 'infrastructure/**'
     branches:
       - main
 
