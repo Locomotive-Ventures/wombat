@@ -1,5 +1,5 @@
 .ONESHELL:
-.PHONY: all help install check precommit tfswitch tfinit tfplan tfapply tfproviders lint secure clean
+.PHONY: all help install check precommit tfswitch tfinit tfplan tfapply tfproviders tfreconfigure lint secure clean
 .DEFAULT_GOAL = help
 SHELL := /bin/zsh
 APPNAME = wardenwombat
@@ -64,7 +64,7 @@ help: check
 	@echo ' make tfplan               run terraform plans                         '
 	@echo ' make tfapply              apply terraform on project folder           '
 	@echo ' make tfproviders          print providers for project folder          '
-	@echo ' make tfcook               cook up terraform resourcing from instance  '
+	@echo ' make tfreconfigure		   reconfigure terraform state                  '
 	@echo ' make lint                 lint and validate terraform project         '
 	@echo ' make secure               test project security                       '
 	@echo ' make clean                remove all local caches                     '
@@ -93,6 +93,9 @@ tfapply:
 
 tfproviders:
 	@$(TERRAFORMBINARY) -chdir=$(p) providers
+
+tfreconfigure:
+	@$(TERRAFORMBINARY) -chdir=$(p) init -migrate-state
 
 secure:
 	@tfsec $(p)
