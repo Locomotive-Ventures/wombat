@@ -91,19 +91,19 @@ tfswitch: tfstage
 	@tfswitch --chdir=$(p) --latest
 
 tfinit: tfstage
-	@$(TERRAFORMBINARY) -chdir=$(p) init -upgrade
+	@$(TERRAFORMBINARY) -chdir=$(p) init -upgrade -backend-config=s3.tfvars
 
 tfplan: tfstage
-	@$(TERRAFORMBINARY) -chdir=$(p) plan
+	@$(TERRAFORMBINARY) -chdir=$(p) plan -backend-config=s3.tfvars
 
 tfapply: tfstage
-	@$(TERRAFORMBINARY) -chdir=$(p) apply -input=false -auto-approve
+	@$(TERRAFORMBINARY) -chdir=$(p) apply -input=false -auto-approve -backend-config=s3.tfvars
 
 tfproviders: tfstage
-	@$(TERRAFORMBINARY) -chdir=$(p) providers
+	@$(TERRAFORMBINARY) -chdir=$(p) providers -backend-config=s3.tfvars
 
 tfreconfigure: tfstage
-	@$(TERRAFORMBINARY) -chdir=$(p) init -migrate-state
+	@$(TERRAFORMBINARY) -chdir=$(p) init -migrate-state -backend-config=s3.tfvars
 
 secure:
 	@tfsec $(p)
