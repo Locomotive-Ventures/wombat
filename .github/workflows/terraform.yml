@@ -136,5 +136,20 @@ jobs:
         run: |
           terraform -chdir=infrastructure/terraform plan -input=false -out=tfplan
 
+      # Apply the changes required to reach the desired state of the configuration
       - name: Terraform Apply
         run: terraform -chdir=infrastructure/terraform apply -auto-approve -input=false tfplan
+
+      # Auto-merge pull request as changes have been applied
+      - name: Auto-Merge Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pull_number = context.payload.issue.number;
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull_number,
+              merge_method: 'merge'  # Choose 'merge', 'squash', or 'rebase'
+            });
