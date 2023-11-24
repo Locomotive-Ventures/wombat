@@ -14,6 +14,7 @@ CHECKTFSEC := $(shell tfsec --version 2>/dev/null)
 CHECKTFORM := $(shell terraformer --version 2>/dev/null)
 TERRAFORMBINARY := $(shell which terraform)
 p = infrastructure/terraform
+DEBUG_MODE = false
 
 header:
 	@echo -e "$(BLUE)--------------------------------------------------"
@@ -79,22 +80,29 @@ install:
 	@brew install warrensbox/tap/tfswitch
 	@brew install --HEAD terraformer
 
-tfswitch:
+tfstage:
+	@if [ "$(DEBUG_MODE)" = "true" ]; then \
+		export TF_LOG=TRACE; \
+	else \
+		unset TF_LOG; \
+	fi; \
+
+tfswitch: tfstage
 	@tfswitch --chdir=$(p) --latest
 
-tfinit:
+tfinit: tfstage
 	@$(TERRAFORMBINARY) -chdir=$(p) init -upgrade
 
-tfplan:
-	@export TF_LOG=TRACE; $(TERRAFORMBINARY) -chdir=$(p) plan
+tfplan: tfstage
+	@$(TERRAFORMBINARY) -chdir=$(p) plan
 
-tfapply:
-	@export TF_LOG=TRACE; $(TERRAFORMBINARY) -chdir=$(p) apply -input=false -auto-approve
+tfapply: tfstage
+	@$(TERRAFORMBINARY) -chdir=$(p) apply -input=false -auto-approve
 
-tfproviders:
+tfproviders: tfstage
 	@$(TERRAFORMBINARY) -chdir=$(p) providers
 
-tfreconfigure:
+tfreconfigure: tfstage
 	@$(TERRAFORMBINARY) -chdir=$(p) init -migrate-state
 
 secure:
@@ -103,3 +111,19 @@ secure:
 lint:
 	@tflint --color $(p)
 
+# tfcook: check
+# 	mkdir -p $(HOME)/bin/ >/dev/null 2>&1
+# 	mkdir -p $(HOME)/.terraform.d/plugins/darwin_amd64 >/dev/null 2>&1
+# 	@tfswitch --chdir=./.terraformer --bin=$(HOME)/bin/terraform
+# 	@~/bin/terraform -chdir=./.terraformer init -upgrade
+# 	@~/bin/terraform -chdir=./.terraformer plan
+# # Copy any new packages over before we start the work with terraformer
+# 	$(shell mkdir ~/.terraform.d/plugins/darwin_arm64)
+# 	$(shell cp -n .terraformer/.terraform/providers/**/terraform-provider* ~/.terraform.d/plugins/darwin_arm64/)
+# 	@echo " "
+# 	@echo "$(BLUE)Note: You need to use AWS credentials in the CLI using 'export' commands."
+# 	@echo "You can test the CLI can access AWS using 'aws sts get-caller-identity'. $(NC)"
+# 	@echo "We are currently connected as: "
+# 	@echo "`aws sts get-caller-identity`"
+# 	@echo " "
+# 	@terraformer import aws --profile "" --regions=ap-southeast-2 --excludes=glue,efs,emr,ec2,ecr,ecs,eks,ecrpublic,ebs,waf,waf_regional,wafv2_cloudfront,wafv2_regional -r "*" -o ".terraformer/generated"
