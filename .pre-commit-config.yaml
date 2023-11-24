@@ -1,0 +1,17 @@
+
+repos:
+    # Security
+    - repo: https://github.com/zricethezav/gitleaks
+      rev: v8.15.2
+      hooks:
+          - id: gitleaks
+    # Terraform
+    - repo: https://github.com/antonbabenko/pre-commit-terraform.git
+      rev: v1.77.0
+      hooks:
+      - id: terraform_fmt
+      # - id: terraform_tflint
+      # - id: terraform_tfsec
+      # - id: terraform_docs
+        # args:
+        # - --args=--config=.terraform-docs.yml
