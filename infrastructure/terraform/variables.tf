@@ -3,8 +3,12 @@
 
 # Twilio variables
 variable "twilio_account_sid" {
-  type = string
+  description = "The Twilio account SID"
+  type        = string
+
 }
 variable "twilio_auth_token" {
-  type = string
+  description = "The Twilio auth token"
+  type        = string
 }
+
