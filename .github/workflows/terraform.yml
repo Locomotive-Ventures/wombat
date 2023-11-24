@@ -40,11 +40,11 @@ jobs:
       # Configure Terraform backend with S3
       - name: Configure Terraform Backend
         run: |
-          terraform init -backend-config="s3.tfvars"
+          terraform -chdir=infrastructure/terraform init -backend-config="s3.tfvars"
 
       # Initialize a new or existing Terraform working directory
       - name: Terraform Init
-        run: terraform -chdir=infrastructure/terraform init
+        run: terraform -chdir=infrastructure/terraform init -input=false
 
       # Checks that all Terraform configuration files adhere to a canonical format
       - name: Terraform Format
