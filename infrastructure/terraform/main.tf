@@ -8,6 +8,8 @@ terraform {
 
   required_version = "~> 1.6.4"
 
+  # Assume the S3 and DynamoDB resources have already been created
+  # This simplifies setup, and we don't treat those as resources in terraform
   backend "s3" {
     bucket         = "wombat-tf-s3-backend"
     key            = "infrastructure/terraform/terraform.tfstate"
@@ -20,21 +22,3 @@ terraform {
 provider "aws" {
   region = "ap-southeast-2"
 }
-
-resource "aws_s3_bucket" "tf-s3-backend" {
-  bucket = "tf-s3-backend"
-  acl    = "private"
-  #TODO: Lock security down further, flesh out details.
-}
-
-resource "aws_dynamodb_table" "tf-statelock" {
-  name         = "tf-statelock"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "LockID"
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-  #TODO: Check details and flesh out.
-}
-
