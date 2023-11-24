@@ -14,6 +14,8 @@ Resources:
       WebsiteConfiguration:
         IndexDocument: index.html
 
+# CloudFront setup
+
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
@@ -45,6 +47,8 @@ Resources:
       CloudFrontOriginAccessIdentityConfig:
         Comment: !Sub "OAI for ${WebsiteBucket}"
 
+# SQS Setup
+
   ContactQueue:
     Type: AWS::SQS::Queue
     Properties:
@@ -66,11 +70,16 @@ Resources:
             Resource:
               Fn::Sub: arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:ContactQueue
 
+# DynamoDB table setup
+
   ContactTable:
     Type: AWS::DynamoDB::Table
     Properties:
+      TableName: 'contact-table'
       AttributeDefinitions:
         - AttributeName: uniqueId
+          AttributeType: S
+        - AttributeName: campaignId
           AttributeType: S
       KeySchema:
         - AttributeName: uniqueId
@@ -78,6 +87,18 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
+      GlobalSecondaryIndexes:
+        - IndexName: CampaignIndex
+          KeySchema:
+            - AttributeName: campaignId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+
+# Lambda to pick up records from the SQS and add them to Dynamo
 
   ContactLambdaLogGroup:
     Type: AWS::Logs::LogGroup
@@ -89,8 +110,8 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Handler: index.handler
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Runtime: python3.8
+      Role: !GetAtt ContactLambdaExecutionRole.Arn
+      Runtime: python3.11
       Code:
         ZipFile: |
           import boto3
@@ -112,7 +133,7 @@ Resources:
           QUEUE_URL: !Ref ContactQueue
           TABLE_NAME: !Ref ContactTable
 
-  LambdaExecutionRole:
+  ContactLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -153,6 +174,8 @@ Resources:
       FunctionName: !GetAtt ContactLambda.Arn
       Enabled: true
       BatchSize: 1
+
+# API to trigger SQS from CloudFront
 
   ContactAPI:
     Type: 'AWS::ApiGateway::RestApi'
@@ -212,10 +235,8 @@ Resources:
       Integration:
         Type: 'AWS'
         IntegrationHttpMethod: 'POST'
-        Uri:
-          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:sqs:path/${AWS::AccountId}/${QueueName}'
-        Credentials:
-          Fn::GetAtt: 'ContactAPIRole.Arn'
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:sqs:path/${AWS::AccountId}/${QueueName}'
+        Credentials: !GetAtt 'ContactAPIRole.Arn'
         RequestParameters:
           'integration.request.header.Content-Type': "'application/x-www-form-urlencoded'"
         RequestTemplates:
@@ -279,6 +300,76 @@ Resources:
                 Resource:
                   Fn::GetAtt: 'ContactQueue.Arn'
 
+# Lambda to query DynamoDB
+
+  DynamoDBAPILambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: DynamoDBReadOnly
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:Query'
+                Resource:
+                  - !GetAtt ContactTable.Arn
+                  - !Sub "${ContactTable.Arn}/index/CampaignIndex"
+
+  DynamoDBAPILambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt DynamoDBAPILambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import os
+          dynamodb = boto3.client('dynamodb')
+          table_name = os.environ['TABLE_NAME']
+          def handler(event, context):
+              campaign_id = event['queryStringParameters']['campaignId']
+              response = dynamodb.query(
+                  TableName=table_name,
+                  IndexName='CampaignIndex',
+                  KeyConditionExpression='campaignId = :v1',
+                  ExpressionAttributeValues={
+                      ':v1': {'S': campaign_id}
+                  }
+              )
+              items = response.get('Items', [])
+              formatted_items = [{k: v['S'] for k, v in item.items()} for item in items]
+              return {
+                  'statusCode': 200,
+                  'headers': {
+                      'Content-Type': 'application/json',
+                      'Access-Control-Allow-Origin': '*'
+                  },
+                  'body': json.dumps(formatted_items)
+              }
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ContactTable
+      Runtime: python3.11
+      Timeout: 10
+
+  DynamoDBAPILambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${DynamoDBAPILambdaFunction}
+      RetentionInDays: 7
+
+# API to query trigger Lambda to query data from Dynamo
+
   DynamoDBAPI:
     Type: AWS::ApiGateway::RestApi
     Properties:
@@ -291,6 +382,27 @@ Resources:
       ParentId: !GetAtt DynamoDBAPI.RootResourceId
       PathPart: 'data'
 
+  DynamoDBAPIRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'apigateway.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: 'DynamoDBAPIPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'lambda:InvokeFunction' # Add this permission to allow API Gateway to invoke Lambda functions
+                Resource:
+                  - !GetAtt DynamoDBAPILambdaFunction.Arn
+
   DynamoDBAPIMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -299,41 +411,24 @@ Resources:
       HttpMethod: 'GET'
       AuthorizationType: 'NONE'
       Integration:
-        Type: AWS
-        IntegrationHttpMethod: 'POST'
-        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:dynamodb:action/Query'
+        Type: 'AWS_PROXY'
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DynamoDBAPILambdaFunction.Arn}/invocations'
         Credentials: !GetAtt DynamoDBAPIRole.Arn
+        IntegrationHttpMethod: 'POST'
+        RequestParameters:
+          'integration.request.header.Content-Type': "'application/x-www-form-urlencoded'"
         RequestTemplates:
-          application/json: |
-            {
-              "TableName": "${ContactTable}",
-              "KeyConditionExpression": "uniqueId = :v1",
-              "ExpressionAttributeValues": {
-                ":v1": {"S": "$input.params('uniqueId')"}
-              }
-            }
-        IntegrationResponses:
-          - StatusCode: 200
-            ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Methods: "'GET, OPTIONS'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-            ResponseTemplates:
-              application/json: |
-                #set($inputRoot = $input.path('$'))
-                #if($inputRoot.Items.size() == 0)
-                  {"message": "No item found"}
-                #else
-                  $inputRoot.Items[0]
-                #end
+          'application/json': !Sub |
+            Action=SendMessage&MessageBody=$util.urlEncode("$input.body")
       MethodResponses:
         - StatusCode: 200
+          ResponseModels:
+            application/json: "Empty"
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: true
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
-          ResponseModels:
-            application/json: "Empty"
+            method.response.header.Access-Control-Allow-Credentials: true
 
   DynamoDBAPIOPTIONSMethod:
     Type: AWS::ApiGateway::Method
@@ -363,26 +458,6 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
 
-  DynamoDBAPIRole:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: 'Allow'
-            Principal:
-              Service: 'apigateway.amazonaws.com'
-            Action: 'sts:AssumeRole'
-      Policies:
-        - PolicyName: 'DynamoDBAPIPolicy'
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: 'Allow'
-                Action:
-                  - 'dynamodb:Query'
-                Resource: !GetAtt ContactTable.Arn
-
   DynamoDBAPIDeployment:
     Type: AWS::ApiGateway::Deployment
     Properties:
@@ -404,6 +479,10 @@ Outputs:
     Description: 'Invoke URL of ContactAPI'
     Value:
       Fn::Sub: 'https://${ContactAPI}.execute-api.${AWS::Region}.amazonaws.com/Prod/message'
+  DynamoDBAPIInvokeURL:
+    Description: 'Invoke URL of DynamoDBAPI'
+    Value:
+      Fn::Sub: 'https://${DynamoDBAPI}.execute-api.${AWS::Region}.amazonaws.com/Prod/message'
   WebsiteURL:
     Value: !Sub "https://${CloudFrontDistribution.DomainName}"
   BucketName:
