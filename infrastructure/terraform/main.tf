@@ -5,7 +5,7 @@ terraform {
       version = "~> 5.26"
     }
     twilio = {
-      source = "twilio/twilio"
+      source  = "twilio/twilio"
       version = "~> 0.18.34"
     }
   }

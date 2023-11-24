@@ -113,26 +113,12 @@ tfproviders: tfstage
 tfreconfigure: tfstage
 	@$(TERRAFORMBINARY) -chdir=$(p) init -migrate-state -backend-config=s3.tfvars
 
+tfstateshow:
+	@$(TERRAFORMBINARY) -chdir=$(p) state show .terraform/terraform.tfstate
+
 secure:
 	@tfsec $(p)
 
 lint:
+	@$(TERRAFORMBINARY) -chdir=$(p) fmt -write=true -diff=true -recursive
 	@tflint --chdir=$(p) --color
-	@$(TERRAFORMBINARY) -chdir=$(p) fmt -check=true -diff=true -recursive
-
-# tfcook: check
-# 	mkdir -p $(HOME)/bin/ >/dev/null 2>&1
-# 	mkdir -p $(HOME)/.terraform.d/plugins/darwin_amd64 >/dev/null 2>&1
-# 	@tfswitch --chdir=./.terraformer --bin=$(HOME)/bin/terraform
-# 	@~/bin/terraform -chdir=./.terraformer init -upgrade
-# 	@~/bin/terraform -chdir=./.terraformer plan
-# # Copy any new packages over before we start the work with terraformer
-# 	$(shell mkdir ~/.terraform.d/plugins/darwin_arm64)
-# 	$(shell cp -n .terraformer/.terraform/providers/**/terraform-provider* ~/.terraform.d/plugins/darwin_arm64/)
-# 	@echo " "
-# 	@echo "$(BLUE)Note: You need to use AWS credentials in the CLI using 'export' commands."
-# 	@echo "You can test the CLI can access AWS using 'aws sts get-caller-identity'. $(NC)"
-# 	@echo "We are currently connected as: "
-# 	@echo "`aws sts get-caller-identity`"
-# 	@echo " "
-# 	@terraformer import aws --profile "" --regions=ap-southeast-2 --excludes=glue,efs,emr,ec2,ecr,ecs,eks,ecrpublic,ebs,waf,waf_regional,wafv2_cloudfront,wafv2_regional -r "*" -o ".terraformer/generated"
