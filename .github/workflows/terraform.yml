@@ -72,24 +72,31 @@ jobs:
           name: terraform-plan
           path: plan.txt
 
-      - name: Read Terraform Plan
-        id: read_plan
-        run: |
-          echo "TF_PLAN<<EOF" >> $GITHUB_ENV
-          cat plan.txt >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: Comment Terraform Plan
-        uses: Locomotive-Ventures/create-or-update-comment@main
+      - uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
-          # token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            **Terraform Plan Output:**
-            ```
-            ${{ steps.plan.outputs.stdout }}
-            ```
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
 
       # On push to "main", build or change infrastructure according to Terraform configuration files
       - name: Terraform Apply
