@@ -43,6 +43,21 @@ jobs:
       - name: Terraform Apply
         run: terraform -chdir=infrastructure/terraform apply -auto-approve -input=false tfplan
 
+      # Post a success comment
+      - name: Post Success Comment
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = context.payload.issue.number;
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              body: ':rocket: Terraform apply successful! Attempting to merge pull request...'
+            });
+
       # Auto-merge pull request as changes have been applied
       - name: Auto-Merge Pull Request
         uses: actions/github-script@v6
