@@ -11,7 +11,7 @@ terraform {
   # Assume the S3 and DynamoDB resources have already been created
   # This simplifies setup, and we don't treat those as resources in terraform
   backend "s3" {
-    key            = "infrastructure/terraform/terraform.tfstate"
+    key = "infrastructure/terraform/terraform.tfstate"
   }
 }
 
