@@ -65,6 +65,17 @@ jobs:
           name: terraform-plan
           path: plan.txt
 
+      - name: Comment Terraform Plan
+        uses: peter-evans/create-or-update-comment@v1
+        if: github.event_name == 'pull_request'
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            **Terraform Plan Output:**
+            ```
+            ${{ steps.plan.outputs.plan_output }}
+            ```
+
       # On push to "main", build or change infrastructure according to Terraform configuration files
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
