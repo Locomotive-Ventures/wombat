@@ -1,3 +1,3 @@
-resource "aws_sqs_queue" "my_queue" {
-  name = "MyQueue"
-}
+# resource "aws_sqs_queue" "my_queue" {
+#   name = "MyQueue"
+# }
