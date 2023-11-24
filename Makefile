@@ -68,3 +68,6 @@ help: check
 	@echo ' make secure               test project security                       '
 	@echo ' make clean                remove all local caches                     '
 	@echo ' '
+
+tfswitch:
+	@tfswitch --chdir=$(p) --latest
