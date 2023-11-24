@@ -52,9 +52,20 @@ jobs:
 
       # Generates an execution plan for Terraform
       - name: Terraform Plan
-        run: terraform -chdir=infrastructure/terraform plan -input=false
+        id: plan
+        run: |
+          terraform -chdir=infrastructure/terraform plan -input=false -out=tfplan
+          terraform -chdir=infrastructure/terraform show -no-color tfplan > plan.txt
+        continue-on-error: true
+
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v2
+        if: steps.plan.outcome == 'success'
+        with:
+          name: terraform-plan
+          path: plan.txt
 
       # On push to "main", build or change infrastructure according to Terraform configuration files
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform -chdir=infrastructure/terraform apply -auto-approve -input=false
+        run: terraform -chdir=infrastructure/terraform apply tfplan -auto-approve -input=false
