@@ -81,6 +81,19 @@ install:
 
 tfswitch:
 	@tfswitch --chdir=$(p) --latest
+
+tfinit:
+	@$(TERRAFORMBINARY) -chdir=$(p) init -upgrade
+
+tfplan:
+	@export TF_LOG=TRACE; ~/bin/terraform -chdir=$(p) plan
+
+tfapply:
+	@export TF_LOG=TRACE; ~/bin/terraform -chdir=$(p) apply -input=false -auto-approve
+
+tfproviders:
+	@~/bin/terraform -chdir=$(p) providers
+
 secure:
 	@tfsec $(p)
 
