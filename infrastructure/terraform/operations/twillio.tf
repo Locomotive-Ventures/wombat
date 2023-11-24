@@ -1,5 +1,4 @@
 resource "twilio_api_accounts_incoming_phone_numbers" "phone_number" {
-  account_sid   = var.twilio_account_sid
   area_code     = "61"
   friendly_name = "terraform phone number"
   sms_url       = "https://demo.twilio.com/welcome/sms/reply"
