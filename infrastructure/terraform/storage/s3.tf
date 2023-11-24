@@ -1,22 +1,22 @@
-# resource "aws_s3_bucket" "s3_bucket_static_website" {
-#   bucket = "wombat-warden-s3-static-website"
+resource "aws_s3_bucket" "s3_bucket_static_website" {
+  bucket = "wombat-warden-s3-static-website"
 
-#   lifecycle {
-#     prevent_destroy = true
-#   }
-# }
+  lifecycle {
+    prevent_destroy = true
+  }
+}
 
-# resource "aws_s3_bucket_website_configuration" "s3_website_config" {
-#   bucket = aws_s3_bucket.s3_bucket_static_website.id
+resource "aws_s3_bucket_website_configuration" "s3_website_config" {
+  bucket = aws_s3_bucket.s3_bucket_static_website.id
 
-#   index_document {
-#     suffix = "index.html"
-#   }
+  index_document {
+    suffix = "index.html"
+  }
 
-#   error_document {
-#     key = "error.html"
-#   }
-# }
+  error_document {
+    key = "error.html"
+  }
+}
 
 # resource "aws_s3_bucket_policy" "s3_bucket_policy" {
 #   bucket = aws_s3_bucket.s3_bucket_static_website.id
