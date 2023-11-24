@@ -29,7 +29,7 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy" {
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": "arn:aws:iam::123456789012:root"  // Replace with your AWS account ID
+        "AWS": "arn:aws:iam::123456789012:root"
       },
       "Action": "s3:GetObject",
       "Resource": "arn:aws:s3:::wombat-warden-s3-static-website/*"
