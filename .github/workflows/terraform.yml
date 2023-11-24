@@ -68,6 +68,11 @@ jobs:
           name: terraform-plan
           path: plan.txt
 
+      - name: Read Terraform Plan
+        id: read_plan
+        run: |
+          echo "::set-env name=TF_PLAN::$(cat plan-output/plan.txt)"
+
       - name: Comment Terraform Plan
         uses: Locomotive-Ventures/create-or-update-comment@main
         if: github.event_name == 'pull_request'
@@ -77,7 +82,7 @@ jobs:
           body: |
             **Terraform Plan Output:**
             ```
-            ${{ readFile('plan.txt') }}
+            ${{ env.TF_PLAN }}
             ```
 
       # On push to "main", build or change infrastructure according to Terraform configuration files
