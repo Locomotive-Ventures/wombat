@@ -12,6 +12,7 @@ CHECKTFSWITCH := $(shell tfswitch --version 2>/dev/null)
 CHECKTFLINT := $(shell tflint --version 2>/dev/null)
 CHECKTFSEC := $(shell tfsec --version 2>/dev/null)
 CHECKTFORM := $(shell terraformer --version 2>/dev/null)
+p = infrastructure/terraform
 
 header:
 	@echo -e "$(BLUE)--------------------------------------------------"
