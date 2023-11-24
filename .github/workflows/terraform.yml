@@ -71,7 +71,7 @@ jobs:
         uses: Locomotive-Ventures/create-or-update-comment@main
         if: github.event_name == 'pull_request'
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             **Terraform Plan Output:**
