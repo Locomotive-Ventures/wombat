@@ -40,21 +40,21 @@ jobs:
       # Configure Terraform backend with S3
       - name: Configure Terraform Backend
         run: |
-          terraform init -backend-config="backend.tfvars"
+          terraform init -backend-config="s3.tfvars"
 
       # Initialize a new or existing Terraform working directory
       - name: Terraform Init
-        run: terraform init
+        run: terraform -chdir=infrastructure/terraform init
 
       # Checks that all Terraform configuration files adhere to a canonical format
       - name: Terraform Format
-        run: terraform fmt -check
+        run: terraform -chdir=infrastructure/terraformfmt -check
 
       # Generates an execution plan for Terraform
       - name: Terraform Plan
-        run: terraform plan -input=false
+        run: terraform -chdir=infrastructure/terraform plan -input=false
 
       # On push to "main", build or change infrastructure according to Terraform configuration files
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+        run: terraform -chdir=infrastructure/terraform apply -auto-approve -input=false
