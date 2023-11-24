@@ -16,6 +16,11 @@ jobs:
   terraform-apply:
     if: github.event.issue.pull_request != null && contains(github.event.comment.body, 'apply')
     runs-on: ubuntu-latest
+    env:
+      TF_VAR_twilio_account_sid: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TF_VAR_twilio_auth_token: ${{ secrets.TWILIO_AUTH_TOKEN}}
+    environment: terraform-production
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
