@@ -10,7 +10,7 @@ terraform {
 
   backend "s3" {
     bucket         = "tf-s3-backend"
-    key            = "/terraform.tfstate"
+    key            = "infrastructure/terraform/terraform.tfstate"
     region         = "ap-southeast-2" # Change this to your desired AWS region
     encrypt        = true
     dynamodb_table = "tf-statelock"
@@ -35,6 +35,6 @@ resource "aws_dynamodb_table" "tf-statelock" {
     name = "LockID"
     type = "S"
   }
-  #TODO: Check details and flesh out. 
+  #TODO: Check details and flesh out.
 }
 
