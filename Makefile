@@ -13,3 +13,9 @@ CHECKTFLINT := $(shell tflint --version 2>/dev/null)
 CHECKTFSEC := $(shell tfsec --version 2>/dev/null)
 CHECKTFORM := $(shell terraformer --version 2>/dev/null)
 
+header:
+	@echo -e "$(BLUE)--------------------------------------------------"
+	@echo -e "🚀 Automated makefile helper for: $(APPNAME)"
+	@echo -e "--------------------------------------------------$(NC)"
+	@echo ' '
+
