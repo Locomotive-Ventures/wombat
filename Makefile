@@ -19,3 +19,34 @@ header:
 	@echo -e "--------------------------------------------------$(NC)"
 	@echo ' '
 
+check: header
+	@echo 'Requirements Checks:'
+# Check if Terraform is installed and ready to use
+ifdef CHECKTF
+	@echo " ✅ terraform is installed ($(shell which terraform))"
+else
+	@echo " ❌ terraform is not installed"
+	$(error "$(ERRORCHECK)")
+endif
+# Check if Terraform Switch is installed and ready to use
+ifdef CHECKTFSWITCH
+	@echo " ✅ tfswitch is installed ($(shell which tfswitch))"
+else
+	@echo " ❌ tfswitch is not installed"
+	$(error "$(ERRORCHECK)")
+endif
+# Check if Terraform Lint is installed and ready to use
+ifdef CHECKTFLINT
+	@echo " ✅ tflint is installed ($(shell which tflint))"
+else
+	@echo " ❌ tflint is not installed"
+	$(error "$(ERRORCHECK)")
+endif
+# Check if tfsec is installed and ready to use
+ifdef CHECKTFSEC
+	@echo " ✅ tfsec is installed ($(shell which tfsec))"
+else
+	@echo " ❌ tfsec is not installed"
+	$(error "$(ERRORCHECK)")
+endif
+	@echo " "
