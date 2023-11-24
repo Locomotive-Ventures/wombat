@@ -54,5 +54,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: pull_number,
-              merge_method: 'merge'  # Choose 'merge', 'squash', or 'rebase'
+              merge_method: 'merge'
             });
