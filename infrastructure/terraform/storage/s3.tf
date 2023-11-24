@@ -18,23 +18,23 @@ resource "aws_s3_bucket_website_configuration" "s3_website_config" {
   }
 }
 
-resource "aws_s3_bucket_policy" "s3_bucket_policy" {
-  bucket = aws_s3_bucket.s3_bucket_static_website.id
+# resource "aws_s3_bucket_policy" "s3_bucket_policy" {
+#   bucket = aws_s3_bucket.s3_bucket_static_website.id
 
-  #TODO: Update role/principal, used dummy values to get TF working
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "arn:aws:iam::123456789012:root"
-      },
-      "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::wombat-warden-s3-static-website/*"
-    }
-  ]
-}
-POLICY
-}
+#   #TODO: Update role/principal, used dummy values to get TF working
+#   policy = <<POLICY
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Effect": "Allow",
+#       "Principal": {
+#         "AWS": "arn:aws:iam::123456789012:root"
+#       },
+#       "Action": "s3:GetObject",
+#       "Resource": "arn:aws:s3:::wombat-warden-s3-static-website/*"
+#     }
+#   ]
+# }
+# POLICY
+# }
