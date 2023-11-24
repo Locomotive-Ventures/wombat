@@ -109,7 +109,8 @@ secure:
 	@tfsec $(p)
 
 lint:
-	@tflint --color $(p)
+	@tflint --chdir=$(p) --color
+	@$(TERRAFORMBINARY) -chdir=$(p) fmt -check=true -diff=true -recursive
 
 # tfcook: check
 # 	mkdir -p $(HOME)/bin/ >/dev/null 2>&1
