@@ -77,7 +77,7 @@ jobs:
           body: |
             **Terraform Plan Output:**
             ```
-            ${{ steps.plan.outputs.plan_output }}
+            ${{ readFile('plan.txt') }}
             ```
 
       # On push to "main", build or change infrastructure according to Terraform configuration files
