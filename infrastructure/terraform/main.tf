@@ -11,11 +11,7 @@ terraform {
   # Assume the S3 and DynamoDB resources have already been created
   # This simplifies setup, and we don't treat those as resources in terraform
   backend "s3" {
-    bucket         = "wombat-tf-s3-backend"
     key            = "infrastructure/terraform/terraform.tfstate"
-    region         = "ap-southeast-2"
-    encrypt        = true
-    dynamodb_table = "wombat-tf-statelock"
   }
 }
 
