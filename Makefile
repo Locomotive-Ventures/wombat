@@ -51,3 +51,20 @@ else
 	$(error "$(ERRORCHECK)")
 endif
 	@echo " "
+
+help: check
+	@echo ' '
+	@echo 'Usage: '
+	@echo ' make install              attempt to install required dependencies    '
+	@echo ' make check                check you have all required dependencies    '
+	@echo ' make precommit            run precommit lint and test                 '
+	@echo ' make tfswitch             set correct version of terraform (tfswitch) '
+	@echo ' make tfinit                initialise terraform requirements           '
+	@echo ' make tfplan               run terraform plans                         '
+	@echo ' make tfapply              apply terraform on project folder           '
+	@echo ' make tfproviders          print providers for project folder          '
+	@echo ' make tfcook               cook up terraform resourcing from instance  '
+	@echo ' make lint                 lint and validate terraform project         '
+	@echo ' make secure               test project security                       '
+	@echo ' make clean                remove all local caches                     '
+	@echo ' '
