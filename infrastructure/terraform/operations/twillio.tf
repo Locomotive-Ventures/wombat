@@ -1,6 +1,11 @@
-resource "twilio_phone_numbers_incoming_v1_phone_number" "australian_voice_number" {
-  # The phone number to purchase
-  phone_number = var.australian_voice_number
-  # The SID of the account that should own this phone number
-  account_sid = var.twilio_account_sid
+resource "twilio_api_accounts_incoming_phone_numbers" "phone_number" {
+  account_sid   = var.twilio_account_sid
+  area_code     = "61"
+  friendly_name = "terraform phone number"
+  sms_url       = "https://demo.twilio.com/welcome/sms/reply"
+  voice_url     = "https://demo.twilio.com/docs/voice.xml"
+}
+
+output "phone_numbers" {
+  value = twilio_api_accounts_incoming_phone_numbers.phone_number
 }
