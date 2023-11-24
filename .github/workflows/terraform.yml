@@ -43,18 +43,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'ap-southeast-2'
 
-      # Configure Terraform backend with S3
-      - name: Configure Terraform Backend
-        run: |
-          terraform -chdir=infrastructure/terraform init -backend-config="s3.tfvars"
-
-      # Initialize a new or existing Terraform working directory
-      - name: Terraform Init
-        run: terraform -chdir=infrastructure/terraform init -input=false
-
       # Checks that all Terraform configuration files adhere to a canonical format
       - name: Terraform Format
         run: terraform -chdir=infrastructure/terraform fmt -check=true -diff=true -recursive
+
+      # Configure Terraform backend with S3
+      - name: Configure Terraform Backend
+        run: |
+          terraform -chdir=infrastructure/terraform init -input=false -backend-config="s3.tfvars"
 
       # Generates an execution plan for Terraform
       - name: Terraform Plan
