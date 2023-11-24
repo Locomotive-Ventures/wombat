@@ -39,6 +39,21 @@ jobs:
         run: |
           terraform -chdir=infrastructure/terraform plan -input=false -out=tfplan
 
+      # Post a running comment when Terraform apply starts
+      - name: Post Running Comment
+        if: startsWith(github.event.comment.body, 'apply')
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = context.payload.issue.number;
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              body: ':hourglass_flowing_sand: Terraform apply is running...'
+            });
+
       # Apply the changes required to reach the desired state of the configuration
       - name: Terraform Apply
         run: terraform -chdir=infrastructure/terraform apply -auto-approve -input=false tfplan
