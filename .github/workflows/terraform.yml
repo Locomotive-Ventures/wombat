@@ -67,7 +67,7 @@ jobs:
           path: plan.txt
 
       - name: Comment Terraform Plan
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v3
         if: github.event_name == 'pull_request'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
