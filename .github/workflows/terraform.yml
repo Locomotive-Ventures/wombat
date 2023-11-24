@@ -74,6 +74,35 @@ jobs:
           name: terraform-plan
           path: plan.txt
 
+      - name: Mark Previous Plan Comments as Outdated
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = context.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // List comments
+            const comments = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number
+            });
+
+            // Loop through the comments
+            for (const comment of comments.data) {
+              // Check if the comment is from github-actions[bot] and contains the Terraform plan text
+              if (comment.user.login === 'github-actions[bot]' && comment.body.includes('Terraform Plan Output')) {
+                // Delete the comment
+                await github.rest.issues.deleteComment({
+                  owner,
+                  repo,
+                  comment_id: comment.id
+                });
+              }
+            }
+
       - uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
         env:
