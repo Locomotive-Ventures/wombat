@@ -4,11 +4,16 @@ on:
   push:
     branches:
       - main
-  pull_request_target:
+  pull_request:
 
 permissions:
   contents: read
   pull-requests: write
+
+#cocurrency, we should only ever run this once across the entire repository
+concurrency:
+  group: terraform
+  cancel-in-progress: false
 
 jobs:
   terraform:
@@ -38,18 +43,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'ap-southeast-2'
 
-      # Configure Terraform backend with S3
-      - name: Configure Terraform Backend
-        run: |
-          terraform -chdir=infrastructure/terraform init -backend-config="s3.tfvars"
-
-      # Initialize a new or existing Terraform working directory
-      - name: Terraform Init
-        run: terraform -chdir=infrastructure/terraform init -input=false
-
       # Checks that all Terraform configuration files adhere to a canonical format
       - name: Terraform Format
         run: terraform -chdir=infrastructure/terraform fmt -check=true -diff=true -recursive
+
+      # Configure Terraform backend with S3
+      - name: Configure Terraform Backend
+        run: |
+          terraform -chdir=infrastructure/terraform init -input=false -backend-config="s3.tfvars"
 
       # Generates an execution plan for Terraform
       - name: Terraform Plan
@@ -67,7 +68,7 @@ jobs:
           path: plan.txt
 
       - name: Comment Terraform Plan
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v3
         if: github.event_name == 'pull_request'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
