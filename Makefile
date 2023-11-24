@@ -81,3 +81,9 @@ install:
 
 tfswitch:
 	@tfswitch --chdir=$(p) --latest
+secure:
+	@tfsec $(p)
+
+lint:
+	@tflint --color $(p)
+
