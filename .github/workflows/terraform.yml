@@ -92,10 +92,10 @@ jobs:
 
             // Loop through the comments
             for (const comment of comments.data) {
-              // Check if the comment is from github-actions[bot] and contains the Terraform plan text
-              if (comment.user.login === 'github-actions[bot]' && comment.body.includes('Terraform Plan Output')) {
+              // Check if the comment is from github-actions and contains the Terraform plan text
+              if (comment.user.login === 'github-actions' && comment.body.includes('Terraform Plan Output')) {
                 // Delete the comment
-                await github.rest.issues.deleteComment({
+                await github.rest.issues.minimizeComment({
                   owner,
                   repo,
                   comment_id: comment.id
