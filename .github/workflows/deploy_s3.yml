@@ -81,20 +81,34 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'ap-southeast-2'
+      
+      # Check if CloudFormation stack already exists
+      - name: Check if CloudFormation stack exists
+        id: check-stack
+        run: |
+          stack_status=$(aws cloudformation describe-stacks --stack-name wombat-stack --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo "STACK_NOT_FOUND")
 
-      # Create CloudFormation stack
-      - name: Create CloudFormation Stack
+          echo "Stack Status: $stack_status"
+
+          if [ "$stack_status" != "STACK_NOT_FOUND" ]; then
+            echo "::set-output name=stack_exists::true"
+          else
+            echo "::set-output name=stack_exists::false"
+          fi
+      
+      # If CF stack exists, delete stack
+      - name: Delete CloudFormation stack
+        if: steps.check-stack.outputs.stack_exists == 'true'
+        run: |
+          aws cloudformation delete-stack --stack-name wombat-stack
+          aws cloudformation wait stack-delete-complete --stack-name wombat-stack
+      
+      # Create new CloudFormation stack
+      - name: Create CloudFormation Stack 
         run: |
           aws cloudformation create-stack \
             --stack-name wombat-stack \
             --template-url https://cf-templates-1h5bilay8ris2-ap-southeast-2.s3.ap-southeast-2.amazonaws.com/wombat-stack.yml \
-            --capabilities CAPABILITY_IAM
-
-      # Deploy CloudFormation stack
-      - name: Deploy CloudFormation Stack
-        run: |
-          aws cloudformation deploy \
-            --stack-name wombat-stack \
             --capabilities CAPABILITY_IAM
       
       # Get S3 Website URI
