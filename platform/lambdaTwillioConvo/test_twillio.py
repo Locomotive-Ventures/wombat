@@ -38,20 +38,23 @@ try:
     logging.info(f"Call execution SID: {execution.sid}")
 
     # Polling for call completion
-    # while True:
-    #     print(".", end="", flush=True)  # Print a dot without newline
-    #     updated_call = twilio_client.calls(call.sid).fetch()
+    while True:
+        print(".", end="", flush=True)  # Print a dot without newline
+        updated_execution = twilio_client.studio \
+            .flows(twilio_flow_sid) \
+            .executions(execution.sid) \
+            .fetch()
 
-    #     if updated_call.status != call.status:
-    #         call = updated_call
-    #         logging.info(f"Call Status Updated: {call.status}")
+        if updated_execution.status != execution.status:
+            execution = updated_execution
+            logging.info(f"Flow Execution Status Updated: {execution.status}")
 
-    #     if call.status == "completed" or call.status == "failed":
-    #         break
+        if execution.status in ["ended", "failed"]:
+            break
 
-    #     time.sleep(5)  # Poll every 5 seconds
+        time.sleep(5)  # Poll every 5 seconds
 
-    # logging.info(f"Final Call Status: {call.status}")
+    logging.info(f"Final Flow Execution Status: {execution.status}")
 
 except TwilioRestException as e:
     logging.error(f"Twilio API error: {e}")
