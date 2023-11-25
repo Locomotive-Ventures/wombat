@@ -2,7 +2,7 @@ resource "aws_cloudfront_distribution" "my_cloudfront_distribution" {
   enabled = true
 
   origin {
-    domain_name = var.s3_static_website_domain_name
+    domain_name = var.s3_static_website_domain_name # TO CHANGE
     origin_id   = "myS3Origin"
 
     s3_origin_config {
@@ -40,12 +40,12 @@ resource "aws_cloudfront_distribution" "my_cloudfront_distribution" {
   restrictions {
     geo_restriction {
       restriction_type = "whitelist"
-      locations        = ["US", "CA", "GB", "DE"]
+      locations        = ["US", "CA", "GB", "DE"] # TO CHANGE
     }
   }
 
   viewer_certificate {
-
+    # TO CHANGE
   }
 
   default_root_object = "index.html"
