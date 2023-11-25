@@ -52,15 +52,15 @@ def prepare_initial_response(message_context):
     conversation_history.append({"role": "assistant", "content": response})
     return conversation_history
 
-def initiate_call(phone_number, conversation_id):
-    # Initiate call using Twilio
-    call = twilio_client.calls.create(
-        to=phone_number,
-        from_=twilio_from_number,
-        url=twilio_twiml_url
-    )
-    logging.info(f"Call initiated to {phone_number} with conversation_id {conversation_id}")
-    return {'statusCode': 200, 'body': json.dumps({'message': 'Call initiated'})}
+def initiate_flow(phone_number, conversation_id):
+    # Execute Studio Flow
+    execution = twilio_client.studio \
+        .flows(twilio_flow_sid) \
+        .executions \
+        .create(to=phone_number, from_=twilio_from_number)
+
+    logging.info(f"Flow execution initiated with SID: {execution.sid} for conversation_id: {conversation_id}")
+    return {'statusCode': 200, 'body': json.dumps({'message': 'Flow execution initiated'})}
 
 def continue_conversation(conversation_id, phone_number, message_context):
     # Retrieve conversation history from DynamoDB
