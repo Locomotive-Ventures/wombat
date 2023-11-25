@@ -57,41 +57,27 @@ def get_openai_client():
 
 def get_openai_response(event, client):
     try:
-        user_id = event['queryStringParameters']['user_id']  # Unique user identifier
+        # Extract input from the event object
         user_input = event['queryStringParameters']['message']
 
-        # Retrieve conversation history from DynamoDB
-        conversation_history = get_conversation_history(user_id)
-
-        # Append the new user message to the history
-        conversation_history.append({"role": "user", "content": user_input})
-
         # Generate the response using OpenAI's chat completion API
+        # https://platform.openai.com/docs/guides/text-generation/completions-api
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
-            messages=conversation_history,
+            messages=[
+                {"role": "system", "content": "You are Wombat AI, an emergency service assistant that is speaking to people in evacuation areas affected by bushfires."},
+                {"role": "user", "content": "Hi"},
+                {"role": "assistant", "content": "Hello, this is Wombat AI calling on behalf of the emergency services. I understand you are located in Gippsland, VIC. Can you confirm your current location for verification?"},
+                {"role": "user", "content": user_input}
+            ],
             max_tokens=300,
             temperature=0.7,
             timeout=30
         )
 
-        # Extract the generated message
+        # Extract and return the generated message
         generated_message = response.choices[0].message.content
-
-        # Append the assistant's message to the conversation history
-        conversation_history.append({"role": "assistant", "content": generated_message})
-
-        # Save updated conversation history to DynamoDB
-        save_conversation_history(user_id, conversation_history)
-
         return generated_message
-
-    except OpenAIError as openai_error:
-        logging.error(f"OpenAI API error: {openai_error}")
-        raise ValueError("Error communicating with OpenAI API")
-    except Exception as e:
-        logging.error(f"Error generating response: {e}")
-        raise ValueError("Error processing the input")
 
     except OpenAIError as openai_error:
         logging.error(f"OpenAI API error: {openai_error}")
