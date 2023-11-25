@@ -9,22 +9,38 @@ Warden Wombat (previously Wombat AI) is a voice AI tool to quickly check on peop
 
 ### Team
 * Vincent
-* Ricardo
 * Vejith
 * Liz
 * Olga
+* ~~Ricardo~~
 
 ### Services & Technologies User
 
+#### Services
 * [AWS API Gateway](https://aws.amazon.com/api-gateway/) - API
 * [AWS Cloudfront](https://aws.amazon.com/cloudfront/) - CDN
 * [AWS DynamoDB](https://aws.amazon.com/dynamodb/) - Database
 * [AWS Lambda](https://aws.amazon.com/lambda/) - Microservices
-* [Github Actions](https://github.com/features/actions) - CI/CD
+* [AWS SQS](https://aws.amazon.com/sqs/) - Queue
 * [OpenAI](https://openai.com/) - Large Language Models
-* [Terraform](https://www.terraform.io/) - Infrastructure as Code
 * [Twilio](https://www.twilio.com/) - Telephony
 * [Supabase](https://supabase.io/) - Auth
+
+#### Technologies
+* [AWS Cloudfomation](https://aws.amazon.com/cloudformation/) - Infrastructure as Code (*Prototyping*)
+* [Terraform](https://www.terraform.io/) - Infrastructure as Code (*Production*)
+* [Github Actions](https://github.com/features/actions) - CI/CD
+* [Pre-commit](https://pre-commit.com/) - Code Quality
+* [Make](https://www.gnu.org/software/make/) - Build Tool
+
+### Possible Enhancements
+
+During the MVP development we identified a number of enhancements that could be made to the platform in a very quick manner. These are listed below:
+
+* Support for multiple languages *(already possible, just need to tweak workflows)*
+* Support for keypad for people with hearing disabilities *(already possible, just need to tweak workflows)*
+* Replace OpenAI with Amazon Bedrock. Due to time constraints and limitations obtaining credits this was only tested with UI and not integrated with the platform.
+* Pulling in call recordings from Twillio and storing them in S3 for future reference. This was not implemented due to time constraints.
 
 ### Branding
 - All brand assets can be located in the [assets](./assets) folder.
