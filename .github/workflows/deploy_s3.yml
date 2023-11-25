@@ -18,7 +18,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  terraform-plan:
+  build-s3:
+    name: 'Build S3'
+    runs-on: ubuntu-latest
+    environment: deploys3
+
+    # Use the Bash shell regardless of the GitHub Actions runner's OS
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+        working-directory: frontend
+
+      # Build, and test
+      - name: Build
+        run: npm run build
+        working-directory: frontend
+
+  deploy-s3:
+    needs: build-s3
     name: 'Deploy S3'
     runs-on: ubuntu-latest
     environment: deploys3
@@ -41,15 +67,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'ap-southeast-2'
 
-      # Build nextjs frontend
-      - name: Build NextJS frontend
-        run: |
-          cd frontend
-          npm install
-          npm run build
-          cd ..
-
       # Deploy frontend to s3 bucket using AWS CLI
       - name: Deploy to S3
         run: |
-          aws s3 sync frontend/ s3://wombat-warden-s3-static-website/ --delete
+          aws s3 sync ./frontend/ s3://wombat-warden-s3-static-website/ --delete
