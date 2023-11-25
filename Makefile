@@ -124,9 +124,9 @@ lint:
 	@tflint --chdir=$(p) --color
 
 tfcook: check
-	@tfswitch --chdir=./.terraformer 1.3.7
-	@$(TERRAFORMBINARY) -chdir=./.terraformer init -upgrade
-	@$(TERRAFORMBINARY) -chdir=./.terraformer plan
+	@tfswitch --chdir=infrastructure/.terraformer 1.6.4
+	@$(TERRAFORMBINARY) -chdir=infrastructure/.terraformer init -upgrade
+	@$(TERRAFORMBINARY) -chdir=infrastructure/.terraformer plan
 # Copy any new packages over before we start the work with terraformer
 # $(shell mkdir ~/.terraform.d/plugins/darwin_arm64)
 # $(shell mkdir ~/.terraform.d/plugins/darwin_amd64)
