@@ -82,7 +82,28 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'ap-southeast-2'
 
+      # Deploy CloudFormation stack
+      - name: Deploy CloudFormation Stack
+        run: |
+          aws cloudformation deploy \
+            --stack-name wombat-stack \
+            --template-file wombat/infrastructure/cloudformation/wombat-stack.yml \
+            --capabilities CAPABILITY_IAM
+      
+      # Get S3 Website URI
+      - name: Get S3 Website name
+        run: |
+          website_bucket_name=$(aws cloudformation describe-stacks \
+            --stack-name wombat-stack \
+            --query 'Stacks[0].Outputs[?OutputKey==`BucketName`].OutputValue' \
+            --output text)
+
+          echo "S3 website name exported from CF template: $website_bucket_name"
+
+          # Set the output value as an environment variable
+          echo "CF_BUCKET_NAME=$website_bucket_name" >> $GITHUB_ENV      
+      
       # Deploy frontend to s3 bucket using AWS CLI
       - name: Deploy to S3
         run: |
-          aws s3 sync ./frontend/ s3://wombat-warden-s3-static-website/ --delete
+          aws s3 sync ./frontend/ s3://{$GITHUB_ENV}/ --delete
