@@ -1,0 +1,88 @@
+name: 'Terraform'
+
+on:
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy_s3.yml'
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+#concurrency, we should only ever run this once across the entire repository
+concurrency:
+  group: deploys3
+  cancel-in-progress: true
+
+jobs:
+  build-s3:
+    name: 'Build S3'
+    runs-on: ubuntu-latest
+    environment: deploys3
+
+    # Use the Bash shell regardless of the GitHub Actions runner's OS
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Cache Node.js dependencies
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v2
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+        working-directory: frontend
+
+      # Build, and test
+      - name: Build
+        run: npm run build
+        working-directory: frontend
+
+      - name: Archive production build
+        uses: actions/upload-artifact@v2
+        with:
+          name: frontend-artifact
+          path: frontend/build
+
+  deploy-s3:
+    needs: build-s3
+    name: 'Deploy S3'
+    runs-on: ubuntu-latest
+    environment: deploys3
+
+    # Use the Bash shell regardless of the GitHub Actions runner's OS
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Configure AWS CLI (required for S3 backend)
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'ap-southeast-2'
+
+      # Deploy frontend to s3 bucket using AWS CLI
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./frontend/ s3://wombat-warden-s3-static-website/ --delete
