@@ -117,7 +117,7 @@ jobs:
           set -x 
           website_bucket_name=$(aws cloudformation describe-stacks \
             --stack-name wombat-stack \
-            --query 'Stacks[0].Outputs[?OutputKey==`BucketName`].OutputValue' \
+            --query 'Stacks[0].Outputs[3].OutputValue' \
             --output text)
 
           echo "S3 website name exported from CF template: $website_bucket_name"
