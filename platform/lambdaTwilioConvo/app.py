@@ -66,20 +66,18 @@ def continue_conversation(conversation_id, phone_number, message_context):
     # Retrieve conversation history from DynamoDB
     conversation_history = get_conversation_history(conversation_id)
 
-    # Check if the message_context is from the user (via Flask app)
-    if message_context:
-        # Append the user message to the conversation history
-        conversation_history.append({"role": "user", "content": message_context})
+    # Append the user message to the conversation history
+    conversation_history.append({"role": "user", "content": message_context})
 
-        # Generate response using OpenAI
-        response = get_openai_response(conversation_history)
-        conversation_history.append({"role": "assistant", "content": response})
+    # Generate response using OpenAI
+    response = get_openai_response(conversation_history)
+    conversation_history.append({"role": "assistant", "content": response})
 
-        # Save updated conversation history to DynamoDB
-        save_conversation_history(conversation_id, conversation_history)
+    # Save updated conversation history to DynamoDB
+    save_conversation_history(conversation_id, conversation_history)
 
-        # Return the response
-        return {'statusCode': 200, 'body': json.dumps({'response': response})}
+    # Return the response
+    return {'statusCode': 200, 'body': json.dumps({'response': response})}
 
 def get_openai_response(conversation_history):
     try:
