@@ -33,6 +33,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      # Cache Node.js dependencies
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v2
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       # Install dependencies
       - name: Install dependencies
         run: npm install
