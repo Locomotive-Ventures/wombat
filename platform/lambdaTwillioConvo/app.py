@@ -15,7 +15,6 @@ twilio_twiml_url = os.getenv("TWILIO_TWIML_URL")
 twilio_from_number = os.getenv("TWILIO_FROM_NUMBER")
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
-
 # DynamoDB setup
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('ConversationHistory')
@@ -43,6 +42,9 @@ def lambda_handler(event, context):
         return continue_conversation(conversation_id, phone_number, message_context)
 
 def prepare_initial_response(message_context):
+    # Prepare initial conversation context
+    message_context = "You are Wombat AI, an emergency service assistant that is speaking to people directly to support with tasks like evacuation, disaster preparation and other such advice. You should greet the user with a direct yet informative manner depending on the situation: Example ```Hello, this is Wombat AI calling on behalf of the emergency services. I understand you are located in Gippsland, VIC. Can you confirm your current location for verification?``` Currently the context you need for this call about the situation and location is as follows:```" + message_context + "```"
+
     # Generate initial response from OpenAI
     conversation_history = [{"role": "system", "content": message_context}]
     response = get_openai_response(conversation_history)
@@ -53,8 +55,8 @@ def initiate_call(phone_number, conversation_id):
     # Initiate call using Twilio
     call = twilio_client.calls.create(
         to=phone_number,
-        from_='<Your Twilio Number>',
-        url='<URL to your TwiML with conversation_id parameter>'
+        from_=twilio_from_number,
+        url=twilio_twiml_url
     )
     logging.info(f"Call initiated to {phone_number} with conversation_id {conversation_id}")
     return {'statusCode': 200, 'body': json.dumps({'message': 'Call initiated'})}
@@ -62,17 +64,21 @@ def initiate_call(phone_number, conversation_id):
 def continue_conversation(conversation_id, phone_number, message_context):
     # Retrieve conversation history from DynamoDB
     conversation_history = get_conversation_history(conversation_id)
-    conversation_history.append({"role": "user", "content": message_context})
 
-    # Generate response using OpenAI
-    response = get_openai_response(conversation_history)
-    conversation_history.append({"role": "assistant", "content": response})
+    # Check if the message_context is from the user (via Flask app)
+    if message_context:
+        # Append the user message to the conversation history
+        conversation_history.append({"role": "user", "content": message_context})
 
-    # Save updated conversation history to DynamoDB
-    save_conversation_history(conversation_id, conversation_history)
+        # Generate response using OpenAI
+        response = get_openai_response(conversation_history)
+        conversation_history.append({"role": "assistant", "content": response})
 
-    # Return the response
-    return {'statusCode': 200, 'body': json.dumps({'response': response})}
+        # Save updated conversation history to DynamoDB
+        save_conversation_history(conversation_id, conversation_history)
+
+        # Return the response
+        return {'statusCode': 200, 'body': json.dumps({'response': response})}
 
 def get_openai_response(conversation_history):
     try:
