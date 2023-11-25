@@ -9,10 +9,10 @@ Warden Wombat (previously Wombat AI) is a voice AI tool to quickly check on peop
 
 ### Team
 * Vincent
-* Ricardo
 * Vejith
 * Liz
 * Olga
+* ~~Ricardo~~
 
 ### Services & Technologies User
 
@@ -25,6 +25,16 @@ Warden Wombat (previously Wombat AI) is a voice AI tool to quickly check on peop
 * [Terraform](https://www.terraform.io/) - Infrastructure as Code
 * [Twilio](https://www.twilio.com/) - Telephony
 * [Supabase](https://supabase.io/) - Auth
+
+### Possible Enhancements
+
+During the MVP development we identified a number of enhancements that could be made to the platform in a very quick manner. These are listed below:
+
+* Support for multiple languages *(already possible, just need to tweak workflows)*
+* Support for keypad for people with hearing disabilities *(already possible, just need to tweak workflows)*
+* Replace OpenAI with Amazon Bedrock. Due to time constraints and limitations obtaining credits this was only tested with UI and not integrated with the platform.
+* Pulling in call recordings from Twillio and storing them in S3 for future reference. This was not implemented due to time constraints.
+*
 
 ### Branding
 - All brand assets can be located in the [assets](./assets) folder.
