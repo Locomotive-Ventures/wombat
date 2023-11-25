@@ -114,6 +114,7 @@ jobs:
       # Get S3 Website URI
       - name: Get S3 Website name
         run: |
+          set -x 
           website_bucket_name=$(aws cloudformation describe-stacks \
             --stack-name wombat-stack \
             --query 'Stacks[0].Outputs[?OutputKey==`BucketName`].OutputValue' \
