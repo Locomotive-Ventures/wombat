@@ -29,6 +29,20 @@ resource "aws_s3_bucket_website_configuration" "s3_website_config" {
 #     {
 #       "Effect": "Allow",
 #       "Principal": {
+#         "Service": "lambda.amazonaws.com"
+#       },
+#       "Action": "s3:GetObject",
+#       "Resource": "arn:aws:s3:::wombat-warden-s3-static-website/*"
+#     }
+#   ]
+# }
+# POLICY
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Effect": "Allow",
+#       "Principal": {
 #         "AWS": "arn:aws:iam::123456789012:root"
 #       },
 #       "Action": "s3:GetObject",
