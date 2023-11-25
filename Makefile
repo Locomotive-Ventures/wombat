@@ -1,5 +1,5 @@
 .ONESHELL:
-.PHONY: all help install check precommit tfswitch tfinit tfplan tfapply tfproviders tfreconfigure lint secure clean
+.PHONY: all help install check precommit tfswitch tfinit tfplan tfapply tfproviders tfreconfigure tfcook lint secure clean
 .DEFAULT_GOAL = help
 
 # Shell and Environment
@@ -139,4 +139,8 @@ tfcook: check
 	@echo "We are currently connected as: "
 	@echo "`aws sts get-caller-identity`"
 	@echo " "
-	@terraformer import aws --profile "" --regions=ap-southeast-2 --excludes=identitystore,glue,efs,emr,ec2,ecr,ecs,eks,ecrpublic,ebs,waf,waf_regional,wafv2_cloudfront,wafv2_regional -r "*" -o "infrastructure/.terraformer/generated"
+	@terraformer import aws --profile=default "" --regions=ap-southeast-2 --excludes=identitystore,glue,efs,emr,ec2,ecr,ecs,eks,ecrpublic,ebs,waf,waf_regional,wafv2_cloudfront,wafv2_regional -r "*" -o "infrastructure/.terraformer/generated"
+
+clean:
+	@rm -rf infrastructure/**/.terraform
+	@rm -rf infrastructure/**/.terraform.lock.hcl
