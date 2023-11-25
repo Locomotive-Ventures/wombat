@@ -1,19 +1,13 @@
-// Initialize AWS
-function initializeAWS() {
-  AWS.config.update({
-    region: "ap-southeast-2",
-  });
-}
+// This code is for API demonstation purposes only
 
-// Function to send data to API Gateway
-function sendToApiGateway(name, phone) {
+// send record to DB
+function sendToApiGateway(campaignId, phone) {
   const apiUrl =
-    "https://1phczcq88h.execute-api.ap-southeast-2.amazonaws.com/Prod/message"; // Replace with your actual API Gateway URL
+    "https://d1uud242rb.execute-api.ap-southeast-2.amazonaws.com/Prod/message"; // Replace with the actual API URL (current endpoint is deployed to Olgas account)
   const data = {
     uniqueId:
       "id" + Date.now().toString(36) + Math.random().toString(36).substr(2, 9),
-    name: name,
-    name: name,
+    campaignId: campaignId,
     phone: phone,
   };
 
@@ -21,7 +15,6 @@ function sendToApiGateway(name, phone) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      // any other necessary headers
     },
     body: JSON.stringify(data),
   })
@@ -33,31 +26,81 @@ function sendToApiGateway(name, phone) {
     })
     .then((data) => {
       console.log("Success:", data);
-      document.getElementById("response").innerHTML +=
-        "Response for " + name + ": " + JSON.stringify(data) + "<br>";
     })
     .catch((error) => {
       console.error("Error:", error);
-      document.getElementById("response").innerHTML +=
-        "Error for " + name + ": " + error + "<br>";
     });
 }
 
-// Event listener for the submit button
-window.onload = function () {
-  initializeAWS();
+// query record from DB by campaign Id
+function queryApiWithId(campaignId) {
+  const apiUrl =
+    "https://87xb6cvhv2.execute-api.ap-southeast-2.amazonaws.com/Prod/data"; // Replace with the actual API URL (current endpoint is deployed to Olgas account)
+  const fullUrl = apiUrl + "?campaignId=" + encodeURIComponent(campaignId);
 
+  fetch(fullUrl, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then(function (response) {
+      console.log(response);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(function (data) {
+      console.log(data);
+
+      const resultsElement = document.getElementById("results");
+      resultsElement.innerHTML = "";
+
+      data.forEach(function (item) {
+        const itemElement = document.createElement("p");
+        itemElement.textContent = JSON.stringify(item);
+        resultsElement.appendChild(itemElement);
+      });
+    })
+    .catch(function (error) {
+      console.error("Error fetching data:", error);
+      document.getElementById("results").innerText = "Error: " + error.message;
+    });
+}
+
+// Event listener for the submit buttons
+window.onload = function () {
+
+  // post request
   document
-    .getElementById("submitButton")
+    .getElementById("contactSubmitButton")
     .addEventListener("click", function () {
       const input = document.getElementById("contactInput").value;
       const parts = input.split(" ");
+
+      const campaignId = parts[0];
+      const phone = parts[1];
+
       if (parts.length === 2) {
-        sendToApiGateway(parts[0], parts[1]);
+        sendToApiGateway(campaignId, phone);
       } else {
         alert("Please enter a name and a phone number separated by a space.");
       }
-
       document.getElementById("contactInput").value = ""; // Clear the input field
+    });
+
+  // get request
+  document
+    .getElementById("idSubmitButton")
+    .addEventListener("click", function () {
+      const inputId = document.getElementById("idInput").value;
+      if (!inputId) {
+        alert("Please enter an ID.");
+        return;
+      }
+      queryApiWithId(inputId);
+
+      document.getElementById("idInput").value = ""; 
     });
 };

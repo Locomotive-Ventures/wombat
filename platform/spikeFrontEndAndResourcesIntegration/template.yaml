@@ -210,7 +210,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Methods: "'POST, OPTIONS'"
+              method.response.header.Access-Control-Allow-Methods: "'GET, POST, OPTIONS'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
             ResponseTemplates:
               application/json: ''
@@ -244,22 +244,12 @@ Resources:
             Action=SendMessage&MessageBody=$util.urlEncode("$input.body")
         IntegrationResponses:
           - StatusCode: 200
-            ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Methods: "'POST, OPTIONS'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Credentials: "'true'"
             ResponseTemplates:
-              application/json: ""
+              application/json: '{"statusCode": 200}'
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
             application/json: "Empty"
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: true
-            method.response.header.Access-Control-Allow-Methods: true
-            method.response.header.Access-Control-Allow-Origin: true
-            method.response.header.Access-Control-Allow-Credentials: true
 
   ContactAPIDeployment:
     Type: AWS::ApiGateway::Deployment
@@ -351,8 +341,9 @@ Resources:
               return {
                   'statusCode': 200,
                   'headers': {
-                      'Content-Type': 'application/json',
-                      'Access-Control-Allow-Origin': '*'
+                      'Access-Control-Allow-Headers': 'Content-Type',
+                      'Access-Control-Allow-Origin': '*',
+                      'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                   },
                   'body': json.dumps(formatted_items)
               }
@@ -430,42 +421,12 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Allow-Credentials: true
 
-  DynamoDBAPIOPTIONSMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      RestApiId: !Ref DynamoDBAPI
-      ResourceId: !Ref DynamoDBAPIResource
-      HttpMethod: OPTIONS
-      AuthorizationType: 'NONE'
-      Integration:
-        Type: 'MOCK'
-        RequestTemplates:
-          application/json: '{"statusCode": 200}'
-        IntegrationResponses:
-          - StatusCode: 200
-            ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Methods: "'GET, OPTIONS'"
-            ResponseTemplates:
-              application/json: ''
-      MethodResponses:
-        - StatusCode: 200
-          ResponseModels:
-            application/json: "Empty"
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: true
-            method.response.header.Access-Control-Allow-Methods: true
-            method.response.header.Access-Control-Allow-Origin: true
-
   DynamoDBAPIDeployment:
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId: !Ref DynamoDBAPI
       Description: 'API Deployment'
-    DependsOn:
-      - DynamoDBAPIMethod
-      - DynamoDBAPIOPTIONSMethod
+    DependsOn: DynamoDBAPIMethod
 
   DynamoDBAPIStage:
     Type: AWS::ApiGateway::Stage
