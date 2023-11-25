@@ -9,10 +9,10 @@ from twilio.rest import Client
 # Load environment variables
 load_dotenv()
 
-# Twilio and OpenAI credentials
+# Load environment variables
 twilio_account_sid = os.getenv("TWILIO_ACCOUNT_SID")
 twilio_auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-twilio_twiml_url = os.getenv("TWILIO_TWIML_URL")
+twilio_flow_sid = os.getenv("TWILIO_FLOW_SID")
 twilio_from_number = os.getenv("TWILIO_FROM_NUMBER")
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
