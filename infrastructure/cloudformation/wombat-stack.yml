@@ -5,7 +5,7 @@ Parameters:
   QueueName:
     Type: String
     Description: The name of the SQS queue
-    Default: contact-queue
+    Default: wombat-contact-queue
 
 Resources:
   WebsiteBucket:
@@ -36,14 +36,14 @@ Resources:
     Properties:
       DistributionConfig:
         Origins:
-          - Id: myS3Origin
+          - Id: wombat-s3-origin
             DomainName: !GetAtt [WebsiteBucket, DomainName]
             S3OriginConfig:
               OriginAccessIdentity: ''
             OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
         Enabled: true
         DefaultCacheBehavior:
-          TargetOriginId: myS3Origin
+          TargetOriginId: wombat-s3-origin
           ViewerProtocolPolicy: redirect-to-https
           ForwardedValues:
             QueryString: false
@@ -89,7 +89,7 @@ Resources:
   ContactTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: 'contact-table'
+      TableName: 'wombat-contact-table'
       AttributeDefinitions:
         - AttributeName: uniqueId
           AttributeType: S
@@ -194,7 +194,7 @@ Resources:
   ContactAPI:
     Type: 'AWS::ApiGateway::RestApi'
     Properties:
-      Name: 'ContactAPI'
+      Name: 'WombatContactAPI'
 
   ContactAPIResource:
     Type: 'AWS::ApiGateway::Resource'
