@@ -13,7 +13,10 @@ twilio_from_number = os.getenv("TWILIO_FROM_NUMBER")
 recipient_number = '+61404638881'  # Replace with the recipient's number
 
 # Initialize Twilio client
-client = Client(account_sid, auth_token)
+twilio_client = Client(
+    twilio_account_sid,
+    twilio_auth_token
+)
 
 call = twilio_client.calls.create(
     to=recipient_number,
