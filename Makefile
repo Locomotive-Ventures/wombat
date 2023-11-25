@@ -120,8 +120,8 @@ secure:
 	@tfsec $(p)
 
 lint:
-	@tflint --chdir=$(p) --color
 	@$(TERRAFORMBINARY) -chdir=$(p) fmt -check=true -diff=true -recursive
+	@tflint --chdir=$(p) --color
 
 tfcook: check
 	@tfswitch --chdir=./.terraformer 1.3.7
