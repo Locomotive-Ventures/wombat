@@ -144,3 +144,16 @@ tfcook: check
 clean:
 	@rm -rf infrastructure/**/.terraform
 	@rm -rf infrastructure/**/.terraform.lock.hcl
+
+awscfcreate:
+	@aws cloudformation create-stack --stack-name $(CFSTACKNAME) --template-body file://$(PWD)/$(CFTEMPLATE) --capabilities CAPABILITY_IAM
+
+awscfdeploy:
+	@aws cloudformation deploy --stack-name $(CFSTACKNAME) --template-file $(CFTEMPLATE) --capabilities CAPABILITY_IAM
+
+awscfupdate:
+	@aws cloudformation update-stack --stack-name $(CFSTACKNAME) --template-body file://$(CFTEMPLATE) --capabilities CAPABILITY_IAM
+
+awscfdelete:
+	@aws cloudformation delete-stack --stack-name $(CFSTACKNAME)
+
