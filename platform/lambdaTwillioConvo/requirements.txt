@@ -1,5 +1,5 @@
 openai
 python-dotenv
 twilio
-botocore
+boto3
 flask
