@@ -1,8 +1,8 @@
-# README for the Wombat AI Conversation Simulator Script
+# Twillio Conversation Layer (Lambda)
 
 ## Overview
 
-This README document explains the usage of a Python script designed to test a sample OpenAI Large Language Model (LLM) prompt call, with the goal of integrating it with Twilio for handling phone calls. The setup allows for local testing as well as deployment on AWS Lambda and API Gateway.
+This README document explains the usage of the Wombat AI Twillio conversation layer, designed for integrating OpenAI's Large Language Model (LLM) with Twilio and AWS services (Lambda and DynamoDB) to handle conversational AI over phone calls. The script supports local testing and deployment on AWS Lambda with API Gateway.
 
 ## Getting Started
 
@@ -10,10 +10,13 @@ This README document explains the usage of a Python script designed to test a sa
 
 - Python 3.x
 - Flask
-- OpenAI API
+- Boto3 (AWS SDK for Python)
+- OpenAI Python Client
+- Twilio Python Client
+- AWS Account (for Lambda and DynamoDB)
+- Twilio Account
 - ngrok (for local testing)
-- AWS Lambda and API Gateway (for deployment)
--
+
 ### Installation
 
 1. Clone the repository to your local machine.
@@ -22,8 +25,12 @@ This README document explains the usage of a Python script designed to test a sa
    pip install -r requirents.txt
    ```
 3. Set up the required environment variables in the .env file or your local environment:
-- `OPENAI_API_KEY`: Your OpenAI API key.
-- `ENVIRONMENT`: Set to `development` for local testing and `production` for deployment.
+    `OPENAI_API_KEY`: Your OpenAI API key.
+    `TWILIO_ACCOUNT_SID`: Your Twilio Account SID.
+    `TWILIO_AUTH_TOKEN`: Your Twilio Auth Token.
+    `TWILIO_TWIML_URL`: The URL to your TwiML application.
+    `TWILIO_FROM_NUMBER`: The Twilio phone number to use for outgoing calls.
+    `ENVIRONMENT`: Set to development for local testing and production for deployment.
 
 ### Running the Application Locally
 
