@@ -27,12 +27,6 @@ try:
         .flows(twilio_flow_sid) \
         .executions \
         .create(to=recipient_number, from_=twilio_from_number)
-    # Create and log call
-    # call = twilio_client.calls.create(
-    #     to=recipient_number,
-    #     from_=twilio_from_number,
-    #     url=twilio_twiml_url
-    # )
 
     logging.info(f"Call initiated via flow {twilio_flow_sid} from: {twilio_from_number} to: {recipient_number}")
     logging.info(f"Call execution SID: {execution.sid}")
