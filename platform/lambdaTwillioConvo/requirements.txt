@@ -1,4 +1,5 @@
 openai
 python-dotenv
-tqdm
+twilio
+botocore
 flask
