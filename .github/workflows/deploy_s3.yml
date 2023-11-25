@@ -87,7 +87,7 @@ jobs:
         run: |
           aws cloudformation create-stack \
             --stack-name wombat-stack \
-            --template-url s3://cf-templates-1h5bilay8ris2-ap-southeast-2/wombat-stack.yml \
+            --template-url https://cf-templates-1h5bilay8ris2-ap-southeast-2.s3.ap-southeast-2.amazonaws.com/wombat-stack.yml \
             --capabilities CAPABILITY_IAM
 
       # Deploy CloudFormation stack
