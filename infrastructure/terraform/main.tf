@@ -38,6 +38,10 @@ module "frontend" {
 
 module "operations" {
   source = "./operations"
+
+  # Pass Twilio credentials to the submodule
+  twilio_account_sid = var.twilio_account_sid
+  twilio_auth_token  = var.twilio_auth_token
 }
 module "storage" {
   source = "./storage"
