@@ -46,5 +46,6 @@ start-ngrok:
 # Simple Flask test using curl
 .PHONY: test
 test:
-	@echo "Testing Flask app with curl..."
-	curl -X POST http://localhost:5001/message -H "Content-Type: application/json" -d '{"message": "Hello"}'
+# @echo "Testing Flask app with curl..."
+# curl -X POST http://localhost:5001/message -H "Content-Type: application/json" -d '{"message": "Hello"}'
+	python test_twillio.py
