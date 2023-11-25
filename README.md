@@ -1,11 +1,19 @@
-![Waden Wombat Logo](assets/branding/wide_logo.png)
+![Warden Wombat Logo](assets/branding/wide_logo.png)
 
 # Warden Wombat
 
 ### Overview
 
+*This project was part of the [AI Hack Melbourne 2023 hackathon](https://www.aihackmelb.com/) to develop a solution to Australia's social & community problems with artificial intelligence. The project was developed in 7 days and is not maintained.*
+
 #### Call agent to support emergency services
 Warden Wombat (previously Wombat AI) is a voice AI tool to quickly check on people's safety during disasters like floods or fires. It makes automated calls to many people, especially where mobile networks might be down. The AI can ask if they're safe, tell them about evacuations, and give them vital info quickly. It's meant to help first responders and the government reach out fast and efficiently in emergencies, making sure everyone gets the help they need.
+
+### Pitch & Demo
+
+[![Watch the video](https://img.youtube.com/vi/I6o0pv71DAg/mqdefault.jpg)](https://youtu.be/I6o0pv71DAg)
+
+*Click the thumbnail watch the pitch recording on youtube.*
 
 ### Team
 * Vincent
@@ -41,6 +49,7 @@ During the MVP development we identified a number of enhancements that could be 
 * Support for keypad for people with hearing disabilities *(already possible, just need to tweak workflows)*
 * Replace OpenAI with Amazon Bedrock. Due to time constraints and limitations obtaining credits this was only tested with UI and not integrated with the platform.
 * Pulling in call recordings from Twillio and storing them in S3 for future reference. This was not implemented due to time constraints.
+* Use of websockets to our own TTS and STT models for smooth conversation flow. This was not implemented due to time constraints.
 
 ### Branding
 - All brand assets can be located in the [assets](./assets) folder.
