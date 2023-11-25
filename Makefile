@@ -139,7 +139,7 @@ tfcook: check
 	@echo "We are currently connected as: "
 	@echo "`aws sts get-caller-identity`"
 	@echo " "
-	@terraformer import aws --profile=default "" --regions=ap-southeast-2 --excludes=identitystore,glue,efs,emr,ec2,ecr,ecs,eks,ecrpublic,ebs,waf,waf_regional,wafv2_cloudfront,wafv2_regional -r "*" -o "infrastructure/.terraformer/generated"
+	@terraformer import aws --profile=default "" --regions=ap-southeast-2 --excludes=acm,alb,appsync,auto_scaling,batch,budgets,cloud9,cloudhsm,codebuild,codecommit,codedeploy,codepipelines,cognito,config,customer_gateway,datapipeline,devicefarm,docdb,eip,elastic_beanstalk,elasticache,elb,eni,es,firehose,iot,kinesis,kms,media_package,media_store,medialive,msk,nacl,rds,redshift,resourcegroups,route53,secretsmanager,securityhub,servicecatalog,sfn,sns,ssm,swf,transit_gateway,vpc_peering,vpn_connection,vpn_gateway,workspace,xray,identitystore,glue,efs,emr,ec2,ecr,ecs,eks,ecrpublic,ebs,waf,waf_regional,wafv2_cloudfront,wafv2_regional -r "*" -o "infrastructure/.terraformer/generated"
 
 clean:
 	@rm -rf infrastructure/**/.terraform
