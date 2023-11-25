@@ -4,6 +4,7 @@ import Header from '@/components/Header'
 import Head from 'next/head';
 import AuthButton from '@/components/AuthButton';
 import { tree } from 'next/dist/build/templates/app-page';
+// @ts-ignore
 import * as CryptoJS from 'crypto-js';
 
 
@@ -16,17 +17,25 @@ export default async function Index() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const dataScrambler = async (formData: FormData) => 
+
+  const inputValidation = async (phoneNumbersArray: string[]) => 
   {
-    "use server"
-    console.log("data scrambled");
-    return (formData);
+    "use server"    
+    // Validate each phone number and log separately
+    for (const phoneNumber of phoneNumbersArray) {
+      // Check if the entry contains only numbers
+      if (!/^\d+$/.test(phoneNumber)) {
+          console.log(`Invalid Input: "${phoneNumber}" contains non-numeric characters.`);
+          return false; // Exit the function if there's an invalid input
+      }
+
+      // Additional validation for the phone number format (adjust the regex as needed)
+      if (!/^\d{10}$/.test(phoneNumber)) {
+          console.log(`Invalid Input: "${phoneNumber}" does not match the expected format.`);
+          return false; // Exit the function if there's an invalid format
+      }     
   }
 
-  const inputValidation = async (formData: FormData) => 
-  {
-    "use server"
-    console.log(formData);
     return true;
   }
 
@@ -46,33 +55,67 @@ export default async function Index() {
     return campaignId;
 }
 
+const arrayGenerator = async (formData: FormData) =>
+{
+  "use server"
+  const phoneNumberList = formData.get('numlist') as string;
+  const phoneNumbersArray: string[] = phoneNumberList.split(/\s*,\s*/);
+  return phoneNumbersArray
+}
+
   const handleSubmit = async (formData: FormData) => {
     "use server"
 
-   /* const phoneNumberList = formData.get('numlist') as string;
-    const isPhoneNumberListValid = /^\d+$/.test(phoneNumberList);
-    console.log(isPhoneNumberListValid)
-    if (isPhoneNumberListValid==false)
+    const phoneNumbersArray = await arrayGenerator(formData);
+    if (await inputValidation(phoneNumbersArray))
     {
-      formData.set('numlist', 'Invalid Entry: Please Enter Only Numbers');
-    }
-    else
-    {
-      console.log(phoneNumberList);
-    }
-    //cName = form.campaignName*/
+      const cid = uniqueIDGenerator(formData);
+      const cName = formData.get('campaignName') as string;
+      const cType = formData.get('campaignType') as string;
+      const cLocation = formData.get('location') as string;
+      // Iterate through each phone number
+      for (const phoneNumber of phoneNumbersArray) {
+      // Assuming you have an API endpoint where you want to make the POST request
+      const apiUrl = 'enter api url here';
 
-    //Input validation
-    if (await inputValidation(formData))
-    {
-      console.log("Data is valid proceeding to next pjhase");
-      console.log(dataScrambler(formData));
-      uniqueIDGenerator(formData);
+      // Assuming you have an object representing the data to be sent in the POST request
+      const postData = {
+        campaignId: cid,
+        campaignName: cName,
+        campaignType: cType,
+        campaignLocation: cLocation,
+        phoneNumber: phoneNumber,
+      };
+
+      // Perform the POST request here (you need to implement this part)
+      // Example using fetch:
+      /*
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData),
+      });
+
+      // Handle the response (you need to implement this part)
+      // Example:
+      if (response.ok) {
+        console.log(`Successfully sent campaign for phone number: ${phoneNumber}`);
+      } else {
+        console.error(`Failed to send campaign for phone number: ${phoneNumber}`);
+      }
+    } catch (error) {
+      console.error(`Error sending campaign for phone number: ${phoneNumber}`, error);
+    }
+    */
+    // End of the POST request code
+  }
     }
     else{
       console.log("Data is invalid cannot proceed to send");
     }
-    //Unique id generation
     //pass to database
   };
   return (
