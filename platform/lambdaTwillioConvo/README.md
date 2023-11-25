@@ -32,6 +32,16 @@ This README document explains the usage of the Wombat AI Twillio conversation la
     `TWILIO_FROM_NUMBER`: The Twilio phone number to use for outgoing calls.
     `ENVIRONMENT`: Set to development for local testing and production for deployment.
 
+## AWS and Twilio Setup
+1. AWS Setup:
+    - Configure AWS CLI with your credentials.
+    - Create a DynamoDB table named ConversationHistory with conversation_id as the primary key.
+    - Deploy the Lambda function with the necessary IAM roles to access DynamoDB.
+
+2. Twilio Setup:
+    - Set up a Twilio phone number.
+    - Configure your Twilio number to make calls and handle responses through your Lambda function.
+
 ### Running the Application Locally
 
 1. Start the Flask application:
