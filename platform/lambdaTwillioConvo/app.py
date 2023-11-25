@@ -11,7 +11,10 @@ load_dotenv()
 # Twilio and OpenAI credentials
 twilio_account_sid = os.getenv("TWILIO_ACCOUNT_SID")
 twilio_auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+twilio_twiml_url = os.getenv("TWILIO_TWIML_URL")
+twilio_from_number = os.getenv("TWILIO_FROM_NUMBER")
 openai_api_key = os.getenv("OPENAI_API_KEY")
+
 
 # DynamoDB setup
 dynamodb = boto3.resource('dynamodb')
@@ -30,22 +33,30 @@ def lambda_handler(event, context):
 
     # Check for initial call from Twilio or subsequent API Gateway call
     if 'initial_call' in event['queryStringParameters']:
-        return initiate_call(phone_number, message_context)
+        # Prepare initial conversation context
+        initial_response = prepare_initial_response(message_context)
+        save_conversation_history(conversation_id, initial_response)
+
+        # Initiate call using Twilio
+        initiate_call(phone_number, conversation_id)
     else:
         return continue_conversation(conversation_id, phone_number, message_context)
 
-def initiate_call(phone_number, message_context):
+def prepare_initial_response(message_context):
+    # Generate initial response from OpenAI
+    conversation_history = [{"role": "system", "content": message_context}]
+    response = get_openai_response(conversation_history)
+    conversation_history.append({"role": "assistant", "content": response})
+    return conversation_history
+
+def initiate_call(phone_number, conversation_id):
     # Initiate call using Twilio
     call = twilio_client.calls.create(
         to=phone_number,
         from_='<Your Twilio Number>',
-        url='<URL to your TwiML>'
+        url='<URL to your TwiML with conversation_id parameter>'
     )
-    logging.info(f"Call initiated to {phone_number}")
-
-    # Save initial message context to DynamoDB
-    save_conversation_history(conversation_id, [{"role": "system", "content": message_context}])
-
+    logging.info(f"Call initiated to {phone_number} with conversation_id {conversation_id}")
     return {'statusCode': 200, 'body': json.dumps({'message': 'Call initiated'})}
 
 def continue_conversation(conversation_id, phone_number, message_context):
