@@ -12,7 +12,7 @@ Warden Wombat (previously Wombat AI) is a voice AI tool to quickly check on peop
 * Vejith
 * Liz
 * Olga
-* ~~Ricardo~~
+* Ricardo
 
 ### Services & Technologies User
 
