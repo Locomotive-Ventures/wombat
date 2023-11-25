@@ -324,6 +324,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - 'dynamodb:Query'
+                  - 'dynamodb:Scan'
                 Resource:
                   - !GetAtt ContactTable.Arn
                   - !Sub "${ContactTable.Arn}/index/CampaignIndex"
@@ -342,14 +343,18 @@ Resources:
           table_name = os.environ['TABLE_NAME']
           def handler(event, context):
               campaign_id = event['queryStringParameters']['campaignId']
-              response = dynamodb.query(
-                  TableName=table_name,
-                  IndexName='CampaignIndex',
-                  KeyConditionExpression='campaignId = :v1',
-                  ExpressionAttributeValues={
-                      ':v1': {'S': campaign_id}
-                  }
-              )
+              if campaign_id == '*':
+                  # Query all items without specifying a campaignId
+                  response = dynamodb.scan(TableName=table_name)
+              else:
+                  response = dynamodb.query(
+                      TableName=table_name,
+                      IndexName='CampaignIndex',
+                      KeyConditionExpression='campaignId = :v1',
+                      ExpressionAttributeValues={
+                          ':v1': {'S': campaign_id}
+                      }
+                  )
               items = response.get('Items', [])
               formatted_items = [{k: v['S'] for k, v in item.items()} for item in items]
               return {
