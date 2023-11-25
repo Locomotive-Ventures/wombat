@@ -43,6 +43,12 @@ jobs:
         run: npm run build
         working-directory: frontend
 
+      - name: Archive production build
+        uses: actions/upload-artifact@v2
+        with:
+          name: frontend-artifact
+          path: frontend/build
+
   deploy-s3:
     needs: build-s3
     name: 'Deploy S3'
