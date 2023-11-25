@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Testing resourses excluding the Caller part
+Description: Testing resources excluding the Caller part
 
 Parameters:
   QueueName:
