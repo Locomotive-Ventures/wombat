@@ -31,7 +31,7 @@ jobs:
     steps:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Cache Node.js dependencies
       - name: Cache Node.js dependencies
@@ -72,7 +72,7 @@ jobs:
     steps:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Configure AWS CLI (required for S3 backend)
       - name: Configure AWS Credentials
