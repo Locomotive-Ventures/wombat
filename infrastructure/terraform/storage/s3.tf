@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "s3_bucket_static_website" {
-  bucket = "wombat-warden-s3-static-website"
+  bucket = "wombat-warden-s3-static-website22"
 
   lifecycle {
     prevent_destroy = true
