@@ -118,7 +118,7 @@ def save_conversation_history(conversation_id, history):
 if __name__ == "__main__":
     test_event = {
         'queryStringParameters': {
-            'phone_number': '+1234567890',
+            'phone_number': '+61404638881',
             'message_context': 'Hello, how can I help you?',
             'conversation_id': '12345',
             'initial_call': True  # Set to False for subsequent messages
