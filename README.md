@@ -33,6 +33,7 @@ Warden Wombat (previously Wombat AI) is a voice AI tool to quickly check on peop
 * [OpenAI](https://openai.com/) - Large Language Models
 * [Twilio](https://www.twilio.com/) - Telephony
 * [Supabase](https://supabase.io/) - Auth
+* [Tome](https://tome.app/) - Presentations
 
 #### Technologies
 * [AWS Cloudfomation](https://aws.amazon.com/cloudformation/) - Infrastructure as Code (*Prototyping*)
@@ -40,6 +41,8 @@ Warden Wombat (previously Wombat AI) is a voice AI tool to quickly check on peop
 * [Github Actions](https://github.com/features/actions) - CI/CD
 * [Pre-commit](https://pre-commit.com/) - Code Quality
 * [Make](https://www.gnu.org/software/make/) - Build Tool
+* [NextJS](https://nextjs.org/) - Frontend
+* [TailwindCSS](https://tailwindcss.com/) - CSS Framework
 
 ### Possible Enhancements
 
@@ -49,7 +52,7 @@ During the MVP development we identified a number of enhancements that could be 
 * Support for keypad for people with hearing disabilities *(already possible, just need to tweak workflows)*
 * Replace OpenAI with Amazon Bedrock. Due to time constraints and limitations obtaining credits this was only tested with UI and not integrated with the platform.
 * Pulling in call recordings from Twillio and storing them in S3 for future reference. This was not implemented due to time constraints.
-* Use of websockets to our own TTS and STT models for smooth conversation flow. This was not implemented due to time constraints.
+* Use of websockets to our own TTS and STT models for smooth conversation flow. This was not implemented due to time constraints, however we did validate this option. If a solution like this were to go to production at scale you would need better control over the audio models and this would be the prefered option.
 
 ### Branding
 - All brand assets can be located in the [assets](./assets) folder.
