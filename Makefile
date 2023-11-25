@@ -139,4 +139,4 @@ tfcook: check
 	@echo "We are currently connected as: "
 	@echo "`aws sts get-caller-identity`"
 	@echo " "
-	@terraformer import aws --profile "" --regions=ap-southeast-2 --excludes=glue,efs,emr,ec2,ecr,ecs,eks,ecrpublic,ebs,waf,waf_regional,wafv2_cloudfront,wafv2_regional -r "*" -o ".terraformer/generated"
+	@terraformer import aws --profile "" --regions=ap-southeast-2 --excludes=identitystore,glue,efs,emr,ec2,ecr,ecs,eks,ecrpublic,ebs,waf,waf_regional,wafv2_cloudfront,wafv2_regional -r "*" -o "infrastructure/.terraformer/generated"
