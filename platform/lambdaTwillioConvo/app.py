@@ -37,8 +37,8 @@ def lambda_handler(event, context):
         initial_response = prepare_initial_response(message_context)
         save_conversation_history(conversation_id, initial_response)
 
-        # Initiate call using Twilio
-        initiate_call(phone_number, conversation_id)
+        # Initiate call using Twilio Studio Flow
+        initiate_flow(phone_number, conversation_id)
     else:
         return continue_conversation(conversation_id, phone_number, message_context)
 
