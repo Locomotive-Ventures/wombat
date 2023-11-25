@@ -85,9 +85,9 @@ jobs:
       # Create CloudFormation stack
       - name: Create CloudFormation Stack
         run: |
-          aws cloudformation create \
+          aws cloudformation create-stack \
             --stack-name wombat-stack \
-            --template-file file://wombat/infrastructure/cloudformation/wombat-stack.yml \
+            --template-url file://wombat/infrastructure/cloudformation/wombat-stack.yml \
             --capabilities CAPABILITY_IAM
 
       # Deploy CloudFormation stack
