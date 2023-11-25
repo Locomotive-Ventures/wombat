@@ -43,7 +43,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::692811742553:role/terraform_plan
           role-session-name: terraform-plan-session
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ap-southeast-2
 
       # Checks that all Terraform configuration files adhere to a canonical format
       - name: Terraform Format

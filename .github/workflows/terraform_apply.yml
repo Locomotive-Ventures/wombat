@@ -26,7 +26,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::692811742553:role/terraform_apply
           role-session-name: terraform-apply-session
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ap-southeast-2
 
       # Post a running comment when Terraform apply starts
       - name: Post Running Comment
