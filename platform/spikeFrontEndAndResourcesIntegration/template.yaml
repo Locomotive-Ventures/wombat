@@ -14,6 +14,21 @@ Resources:
       WebsiteConfiguration:
         IndexDocument: index.html
 
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Statement:
+        - Action: s3:GetObject
+          Effect: Allow
+          Resource: !Sub ${WebsiteBucket.Arn}/*
+          Principal:
+            Service: cloudfront.amazonaws.com
+          Condition:
+            StringEquals:
+              AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
 # CloudFront setup
 
   CloudFrontDistribution:
@@ -24,13 +39,8 @@ Resources:
           - Id: myS3Origin
             DomainName: !GetAtt [WebsiteBucket, DomainName]
             S3OriginConfig:
-              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentity}
-          - Id: DynamoDBAPIOrigin
-            DomainName: !Sub '${DynamoDBAPI}.execute-api.${AWS::Region}.amazonaws.com'
-            CustomOriginConfig:
-              HTTPPort: 80
-              HTTPSPort: 443
-              OriginProtocolPolicy: https-only
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
         Enabled: true
         DefaultCacheBehavior:
           TargetOriginId: myS3Origin
@@ -41,11 +51,15 @@ Resources:
               Forward: none
         DefaultRootObject: index.html
 
-  OriginAccessIdentity:
-    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
     Properties:
-      CloudFrontOriginAccessIdentityConfig:
-        Comment: !Sub "OAI for ${WebsiteBucket}"
+      OriginAccessControlConfig:
+        Description: Default Origin Access Control
+        Name: !Ref AWS::StackName
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
 
 # SQS Setup
 
@@ -210,7 +224,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Methods: "'POST, OPTIONS'"
+              method.response.header.Access-Control-Allow-Methods: "'GET, POST, OPTIONS'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
             ResponseTemplates:
               application/json: ''
@@ -244,22 +258,12 @@ Resources:
             Action=SendMessage&MessageBody=$util.urlEncode("$input.body")
         IntegrationResponses:
           - StatusCode: 200
-            ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Methods: "'POST, OPTIONS'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Credentials: "'true'"
             ResponseTemplates:
-              application/json: ""
+              application/json: '{"statusCode": 200}'
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
             application/json: "Empty"
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: true
-            method.response.header.Access-Control-Allow-Methods: true
-            method.response.header.Access-Control-Allow-Origin: true
-            method.response.header.Access-Control-Allow-Credentials: true
 
   ContactAPIDeployment:
     Type: AWS::ApiGateway::Deployment
@@ -351,8 +355,9 @@ Resources:
               return {
                   'statusCode': 200,
                   'headers': {
-                      'Content-Type': 'application/json',
-                      'Access-Control-Allow-Origin': '*'
+                      'Access-Control-Allow-Headers': 'Content-Type',
+                      'Access-Control-Allow-Origin': '*',
+                      'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                   },
                   'body': json.dumps(formatted_items)
               }
@@ -430,42 +435,12 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Allow-Credentials: true
 
-  DynamoDBAPIOPTIONSMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      RestApiId: !Ref DynamoDBAPI
-      ResourceId: !Ref DynamoDBAPIResource
-      HttpMethod: OPTIONS
-      AuthorizationType: 'NONE'
-      Integration:
-        Type: 'MOCK'
-        RequestTemplates:
-          application/json: '{"statusCode": 200}'
-        IntegrationResponses:
-          - StatusCode: 200
-            ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Methods: "'GET, OPTIONS'"
-            ResponseTemplates:
-              application/json: ''
-      MethodResponses:
-        - StatusCode: 200
-          ResponseModels:
-            application/json: "Empty"
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: true
-            method.response.header.Access-Control-Allow-Methods: true
-            method.response.header.Access-Control-Allow-Origin: true
-
   DynamoDBAPIDeployment:
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId: !Ref DynamoDBAPI
       Description: 'API Deployment'
-    DependsOn:
-      - DynamoDBAPIMethod
-      - DynamoDBAPIOPTIONSMethod
+    DependsOn: DynamoDBAPIMethod
 
   DynamoDBAPIStage:
     Type: AWS::ApiGateway::Stage
@@ -487,5 +462,3 @@ Outputs:
     Value: !Sub "https://${CloudFrontDistribution.DomainName}"
   BucketName:
     Value: !Ref WebsiteBucket
-  OriginAccessIdentity:
-    Value: !Ref OriginAccessIdentity
