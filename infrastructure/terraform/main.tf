@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.26"
     }
+    twilio = {
+      source  = "twilio/twilio"
+      version = "~> 0.18.34"
+    }
   }
 
   required_version = "~> 1.6.4"
@@ -19,6 +23,11 @@ provider "aws" {
   region = "ap-southeast-2"
 }
 
+provider "twilio" {
+  username = var.twilio_account_sid
+  password = var.twilio_auth_token
+}
+
 module "compute" {
   source = "./compute"
 }
@@ -29,6 +38,10 @@ module "frontend" {
 
 module "operations" {
   source = "./operations"
+
+  # Pass Twilio credentials to the submodule
+  twilio_account_sid = var.twilio_account_sid
+  twilio_auth_token  = var.twilio_auth_token
 }
 module "storage" {
   source = "./storage"

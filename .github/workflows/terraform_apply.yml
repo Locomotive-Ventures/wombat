@@ -16,9 +16,19 @@ jobs:
   terraform-apply:
     if: github.event.issue.pull_request != null && contains(github.event.comment.body, 'apply')
     runs-on: ubuntu-latest
+    env:
+      TF_VAR_twilio_account_sid: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TF_VAR_twilio_auth_token: ${{ secrets.TWILIO_AUTH_TOKEN}}
+    environment: terraform-production
+
     steps:
+      # Checkout the repository to the GitHub Actions runner
       - name: Checkout
         uses: actions/checkout@v3
+
+      # Install the latest version of Terraform CLI
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3.0.0
 
       # Configure AWS CLI (required for S3 backend)
       - name: Configure AWS Credentials

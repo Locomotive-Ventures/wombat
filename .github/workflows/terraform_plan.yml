@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'infrastructure/**'
+      - '.github/workflows/**'
     branches:
       - main
 
@@ -20,7 +21,10 @@ jobs:
   terraform-plan:
     name: 'Terraform Plan'
     runs-on: ubuntu-latest
-    environment: production
+    env:
+      TF_VAR_twilio_account_sid: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TF_VAR_twilio_auth_token: ${{ secrets.TWILIO_AUTH_TOKEN}}
+    environment: terraform-plan
 
     # Use the Bash shell regardless of the GitHub Actions runner's OS
     defaults:
