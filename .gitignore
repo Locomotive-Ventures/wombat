@@ -1,6 +1,7 @@
 data
 data/**
 *.env
+example.env
 # !example.env
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,node,terraform,nextjs
