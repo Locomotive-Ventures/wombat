@@ -41,7 +41,7 @@ jobs:
       # Post a running comment when Terraform apply starts
       - name: Post Running Comment
         if: startsWith(github.event.comment.body, 'apply')
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -70,7 +70,7 @@ jobs:
       # Post a success comment
       - name: Post Success Comment
         if: success()
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -84,7 +84,7 @@ jobs:
 
       # Auto-apply "automerge" label to pull request
       - name: Auto-Label Pull Request
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
