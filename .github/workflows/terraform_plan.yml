@@ -78,7 +78,7 @@ jobs:
           path: plan.txt
 
       - name: Mark Previous Plan Comments as Outdated
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -106,7 +106,7 @@ jobs:
               }
             }
 
-      - uses: actions/github-script@v6
+      - uses: actions/github-script@v7
         if: github.event_name == 'pull_request'
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
